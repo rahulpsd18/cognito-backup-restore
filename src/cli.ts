@@ -13,9 +13,9 @@ const searchAWSProfile = async (_: never, input: string) => {
     return fuzzyResult.map(el => {
         return el.original;
     });
-}
+};
 
-const searchAWSRegion = async (_: never, input: string) => {
+const searchCognitoRegion = async (_: never, input: string) => {
     input = input || '';
     const region = [
         { get name() {return chalk.green(this.value) + ' :: US East (N. Virginia)'}, value: 'us-east-1' },
@@ -34,35 +34,63 @@ const searchAWSRegion = async (_: never, input: string) => {
     return fuzzyResult.map(el => {
         return el.original
     });
-}
+};
 
 
 (async () => {
+    try {
+        // choose your profile from available AWS profiles on the local machine
+        const awsProfile = await inquirer.prompt({
+            type: 'autocomplete',
+            name: 'selected',
+            message: 'Choose your AWS Profile',
+            source: searchAWSProfile,
+        });
 
-    // choose your profile from available AWS profiles on the local machine
-    const awsProfile = await inquirer.prompt({
-        type: 'autocomplete',
-        name: 'selected',
-        message: 'Choose your AWS Profile',
-        default: 'default',
-        source: searchAWSProfile,
-    });
+        // choose your region from available AWS profiles on the local machine
+        let awsRegion = await inquirer.prompt({
+            type: 'autocomplete',
+            name: 'selected',
+            message: 'Choose your Cognito Region',
+            source: searchCognitoRegion,
+        });
 
-    // choose your region from available AWS profiles on the local machine
-    let awsRegion = await inquirer.prompt({
-        type: 'autocomplete',
-        name: 'selected',
-        message: 'Choose your AWS Profile',
-        source: searchAWSRegion
-    });
+        // update the config of aws-sdk
+        AWS.config.update({region: awsRegion.selected});
+        AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: awsProfile.selected });
 
-    console.log(chalk.blue(`You have selected: ${awsProfile.selected} ${awsRegion.selected}`));
+        const cognitoISP = new AWS.CognitoIdentityServiceProvider();
 
-    AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile: awsProfile.selected });
-    AWS.config.update({region: awsRegion.selected});
+        const {UserPools} = await cognitoISP.listUserPools({ MaxResults: 60 }).promise();
+        // TODO: handle data.NextToken when exceeding the MaxResult limit
 
-    const cognitoISP = new AWS.CognitoIdentityServiceProvider();
+        const userPoolList = UserPools && UserPools.map(el => ({name: el.Name || '', value: el.Id || ''})) || []
 
-    const userPools = await cognitoISP.listUserPools({ MaxResults: 60 }).promise();
+
+        const searchCognitoPool = async (_: never, input: string) => {
+            input = input || '';
+            // TODO: Check for case when no cognito pool is listed for the region
+            userPoolList.unshift({ name: chalk.magentaBright.bold('ALL'), value: 'all' });
+
+            const fuzzyResult = fuzzy.filter(input, userPoolList, { extract: el => el.value });
+            return fuzzyResult.map(el => {
+                return el.original
+            });
+        };
+
+        // choose your cognito pool from the region you selected
+        let cognitoPool = await inquirer.prompt({
+            type: 'autocomplete',
+            name: 'selected',
+            message: 'Choose your Cognito Region',
+            source: searchCognitoPool,
+            pageSize: 60
+        });
+
+        console.log(chalk.blue(`You have selected: ${chalk.yellow(cognitoPool.selected)}`));
+
+    } catch (error) {
+        console.error(error);
+    }
 
 })();
