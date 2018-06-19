@@ -1,0 +1,31 @@
+{
+  "name": "cognito-backup-restore",
+  "version": "0.0.1",
+  "description": "AIO Tool for backing up and restoring AWS Cognito User Pools",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf ./node_modules && rm package-lock.json && echo Cleanup done.",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "AWS",
+    "cognito",
+    "restore",
+    "backup"
+  ],
+  "author": {
+    "name": "Risabh Kumar",
+    "email": "rahulpsd18@gmail.com"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/aws-sdk": "^2.7.0",
+    "@types/inquirer": "^0.0.42",
+    "typescript": "^2.9.2"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.259.1",
+    "inquirer": "^6.0.0"
+  }
+}
