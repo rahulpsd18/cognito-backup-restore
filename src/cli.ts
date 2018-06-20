@@ -1,10 +1,14 @@
+import * as fs from 'fs';
+import * as path from 'path';
 import * as AWS from 'aws-sdk';
 import * as fuzzy from 'fuzzy';
 import * as inquirer from 'inquirer';
 import chalk from 'chalk';
+import { backupUsers } from './index';
 
 const SharedIniFile = require('aws-sdk/lib/shared_ini');
 
+inquirer.registerPrompt('directory', require('inquirer-select-directory'));
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
 const searchAWSProfile = async (_: never, input: string) => {
@@ -48,7 +52,7 @@ const searchCognitoRegion = async (_: never, input: string) => {
         });
 
         // choose your region from available AWS profiles on the local machine
-        let awsRegion = await inquirer.prompt({
+        const awsRegion = await inquirer.prompt({
             type: 'autocomplete',
             name: 'selected',
             message: 'Choose your Cognito Region',
@@ -82,15 +86,29 @@ const searchCognitoRegion = async (_: never, input: string) => {
         let cognitoPool = await inquirer.prompt({
             type: 'autocomplete',
             name: 'selected',
-            message: 'Choose your Cognito Region',
+            message: 'Choose your Cognito Pool',
             source: searchCognitoPool,
             pageSize: 60
         });
 
-        console.log(chalk.blue(`You have selected: ${chalk.yellow(cognitoPool.selected)}`));
+        let fileLocation = await inquirer.prompt({
+            type: 'directory',
+            name: 'selected',
+            message: 'Choose your file destination',
+            basePath: '.'
+        });
 
+        fileLocation = path.join(fileLocation.selected, 'CognitoBackups');
+
+        // create the folder if not exists
+        !fs.existsSync(fileLocation) && fs.mkdirSync(fileLocation);
+        fileLocation = path.join(fileLocation, `${cognitoPool.selected}.json`);
+
+        await backupUsers(cognitoISP, {UserPoolId: cognitoPool.selected}, fileLocation);
+
+        console.log(chalk.green(`JSON Exported successfully to ${fileLocation}`));
     } catch (error) {
-        console.error(error);
+        console.error(chalk.red(error.message));
     }
 
 })();
