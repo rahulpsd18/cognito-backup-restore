@@ -1,5 +1,6 @@
 import * as fs from 'fs';
-import * as JSONStream from 'JSONStream';
+
+const JSONStream = require('JSONStream');
 
 type CognitoISP = AWS.CognitoIdentityServiceProvider
 type ListUsersRequestTypes = AWS.CognitoIdentityServiceProvider.Types.ListUsersRequest
