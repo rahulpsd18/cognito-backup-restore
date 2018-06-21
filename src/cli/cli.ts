@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as AWS from 'aws-sdk';
 import chalk from 'chalk';
 import { backupUsers } from '../index';

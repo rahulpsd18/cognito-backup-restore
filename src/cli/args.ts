@@ -5,6 +5,8 @@ const dimmed = chalk.dim;
 const greyed = chalk.gray;
 const bold = chalk.bold;
 
+const version = require('../../package').version;
+
 export const argv = yargs
     // header
     .usage(`\nYou can run commands with "cognito-backup-restore" or the shortcut "cbr"\n
@@ -12,16 +14,32 @@ export const argv = yargs
 
     // backup command
     .command('backup', dimmed`Backup/export all users in specified user pool`, (yargs) => {
-        return yargs.option('mode', {
-            default: 'backup'
-        })
+        return yargs.options({
+            mode: {
+                default: 'backup',
+                hidden: true
+            },
+            directory: {
+                alias: ['dir'],
+                describe: dimmed`Directory to export json file to`,
+                string: true
+            }
+        });
     })
 
     // restore command
     .command('restore', dimmed`Restore/import users to a single user pool`, (yargs) => {
-        return yargs.option('mode', {
-            default: 'restore'
-        })
+        return yargs.options({
+            mode: {
+                default: 'restore',
+                hidden: true
+            },
+            file: {
+                alias: ['f'],
+                describe: dimmed`JSON file to import data from`,
+                string: true
+            }
+        });
     })
 
     // examples
@@ -59,11 +77,6 @@ export const argv = yargs
         describe: dimmed`The Cognito pool to use`,
         string: true
     })
-    .option('file', {
-        alias: ['f'],
-        describe: dimmed`Path to export/import json data to/from`,
-        string: true
-    })
 
     // help
     .help('help', dimmed`Show help`)
@@ -71,11 +84,11 @@ export const argv = yargs
     .showHelpOnFail(false, bold`Specify --help for available options`)
 
     // version
-    .version('version', dimmed`Show version number`, (function () { return require('../../package').version; })())
+    .version('version', dimmed`Show version number`, (function () { return version; })())
     .alias('version', 'v')
 
     // footer
     .epilog(dimmed`\nPlease report any issues/suggestions here:\nhttps://github.com/rahulpsd18/cognito-backup-restore/issues\n`)
     .strict()
-    .wrap(Math.min(100, yargs.terminalWidth()))
+    .wrap(Math.min(120, yargs.terminalWidth()))
     .argv;

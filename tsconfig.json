@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es6",
+    "target": "es5",
     "lib": ["es6", "dom", "esnext.asynciterable", "es7"],
     "moduleResolution": "node",
-    "rootDir": "./",
+    "rootDir": "./src/",
     "outDir": "build",
-    "allowJs": true,
     "noImplicitAny": true,
+    "declaration": true,
     // "noUnusedLocals": true,
     "noImplicitThis": true,
     "strictNullChecks": true,

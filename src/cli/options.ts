@@ -11,7 +11,7 @@ const SharedIniFile = require('aws-sdk/lib/shared_ini');
 inquirer.registerPrompt('directory', require('inquirer-select-directory'));
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 
-console.log('ARGV>>:', argv);
+// console.log('ARGV>>:', argv, '\n\n');
 
 const greenify = chalk.green;
 
@@ -97,10 +97,11 @@ const abcd = async () => {
         const userPoolList = UserPools
             && UserPools.map(el => ({ name: el.Name || '', value: el.Id || '' })) || []
 
+        userPoolList.unshift({ name: chalk.magentaBright.bold('ALL'), value: 'all' });
+
         const searchCognitoPool = async (_: never, input: string) => {
             input = input || '';
             // TODO: Check for case when no cognito pool is listed for the region
-            userPoolList.unshift({ name: chalk.magentaBright.bold('ALL'), value: 'all' });
 
             const fuzzyResult = fuzzy.filter(input, userPoolList, { extract: el => el.value });
             return fuzzyResult.map(el => {
@@ -129,11 +130,11 @@ const abcd = async () => {
         } as inquirer.Question);
 
         // TODO: fix this
-        file = path.join(fileLocation.selected, 'CognitoBackups');
+        // file = path.join(fileLocation.selected, 'CognitoBackups');
 
         // create the folder if not exists
-        !fs.existsSync(file) && fs.mkdirSync(file);
-        file = path.join(file, `${userpool}.json`);
+        // !fs.existsSync(file) && fs.mkdirSync(file);
+        file = path.join(fileLocation.selected, `${userpool}.json`);
     }
 
     return { mode, profile, region, key, secret, userpool, file }
