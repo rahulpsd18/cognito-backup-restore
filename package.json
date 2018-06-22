@@ -46,6 +46,7 @@
     "typescript": "^2.9.2"
   },
   "dependencies": {
+    "aws-sdk": "^2.259.1",
     "JSONStream": "^1.3.3",
     "chalk": "^2.4.1",
     "fuzzy": "^0.1.3",
@@ -53,8 +54,5 @@
     "inquirer-autocomplete-prompt": "^0.12.2",
     "inquirer-select-directory": "^1.2.0",
     "yargs": "^11.0.0"
-  },
-  "peerDependencies": {
-    "aws-sdk": "^2.259.1"
   }
 }
