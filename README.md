@@ -83,6 +83,7 @@ cbr <command> [options]
 
 - [X] ~~Add Readme~~
 - [ ] Fine tune the backup process
-- [ ] Convert JSON to CSV
 - [ ] Implement Restore
+- [ ] Convert JSON to CSV
+- [ ] Implement Amazon Cognito User Pool Import Job
 - [ ] AWS Cross-Region Cognito Replication
