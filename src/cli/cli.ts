@@ -16,8 +16,14 @@ const orange = chalk.keyword('orange');
 
         // update the config of aws-sdk based on profile/credentials passed
         AWS.config.update({ region });
-        // TODO: check for aws passed credentials in case region is not provided
-        AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile });
+
+        if (profile) {
+            AWS.config.credentials = new AWS.SharedIniFileCredentials({ profile });
+        } else if (key && secret) {
+            AWS.config.credentials = new AWS.Credentials({
+                accessKeyId: key, secretAccessKey: secret
+            });
+        }
 
         const cognitoISP = new AWS.CognitoIdentityServiceProvider();
 
