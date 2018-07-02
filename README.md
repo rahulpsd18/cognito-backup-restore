@@ -36,7 +36,7 @@ import {backupUsers, restoreUsers} from 'cognito-backup-restore';
 const cognitoISP = new AWS.CognitoIdentityServiceProvider();
 
 // you may use async-await too
-backupUsers(cognitoISP, {UserPoolId: <USERPOOL-ID>}, file)
+backupUsers(cognitoISP, <USERPOOL-ID>, file)
   .then(() => console.log(`Backup completed`))
   .catch(console.error)
 ```
@@ -70,20 +70,21 @@ cbr <command> [options]
   ```
   `--directory` option is available to export json data to.
 
-- **Restore** [*Coming Soon*]
+- **Restore**
   ```shell
   cbr restore
   cbr restore <options>
   ```
   `--file` option is available to read the json file to import from.
+  `--pwd` option is available to set TemporaryPassword of the users.
 
 **In case any of the required option is missing, a interactive command line user interface kicks in to select from.**
 
 ## Todo
 
 - [X] ~~Add Readme~~
-- [ ] Fine tune the backup process
-- [ ] Implement Restore
+- [X] ~~Fine tune the backup process~~
+- [X] ~~Implement Restore~~
 - [ ] Convert JSON to CSV
 - [ ] Implement Amazon Cognito User Pool Import Job
 - [ ] AWS Cross-Region Cognito Replication

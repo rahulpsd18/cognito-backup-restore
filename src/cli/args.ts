@@ -38,6 +38,11 @@ export const argv = yargs
                 alias: ['f'],
                 describe: dimmed`JSON file to import data from`,
                 string: true
+            },
+            password: {
+                alias: ['pwd'],
+                describe: dimmed`TemporaryPassword of the users imported`,
+                string: true
             }
         });
     })

@@ -44,10 +44,10 @@ const searchCognitoRegion = async (_: never, input: string) => {
 };
 
 const verifyOptions = async () => {
-    let { mode, profile, region, key, secret, userpool, file } = argv;
+    let { mode, profile, region, key, secret, userpool, file, password } = argv;
 
     // choose the mode if not passed through CLI or invalid is passed
-    if (!mode || !['restore','backup'].includes(mode)) {
+    if (!mode || !['restore', 'backup'].includes(mode)) {
         const modeChoice = await inquirer.prompt<{ selected: string }>({
             type: 'list',
             name: 'selected',
@@ -144,7 +144,7 @@ const verifyOptions = async () => {
         file = path.join(fileLocation.selected, `${userpool}.json`);
     }
 
-    return { mode, profile, region, key, secret, userpool, file }
+    return { mode, profile, region, key, secret, userpool, file, password }
 };
 
 

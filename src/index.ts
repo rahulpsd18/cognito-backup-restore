@@ -10,12 +10,16 @@ type AdminCreateUserRequest = AWS.CognitoIdentityServiceProvider.Types.AdminCrea
 type AttributeType = AWS.CognitoIdentityServiceProvider.Types.AttributeType;
 
 
-export const backupUsers = async (cognito: CognitoISP, params: ListUsersRequestTypes, file: string) => {
-    if (params.UserPoolId == 'all') throw Error('Backing up all pools is not supported yet');
+export const backupUsers = async (cognito: CognitoISP, userpoolId: string, file: string) => {
+    if (userpoolId == 'all') throw Error('Backing up all pools is not supported yet');
 
     const writeStream = fs.createWriteStream(file);
     const stringify = JSONStream.stringify();
     stringify.pipe(writeStream);
+
+    const params: ListUsersRequestTypes = {
+        UserPoolId: userpoolId
+    };
 
     try {
         const paginationCalls = async () => {
@@ -40,7 +44,10 @@ export const backupUsers = async (cognito: CognitoISP, params: ListUsersRequestT
 };
 
 
-export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string) => {
+export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string) => {
+    const { UserPool } = await cognito.describeUserPool({ UserPoolId }).promise();
+    const UsernameAttributes = UserPool && UserPool.UsernameAttributes || [];
+
     const limiter = new Bottleneck({ minTime: 2000 });
     const readStream = fs.createReadStream(file);
     const parser = JSONStream.parse();
@@ -50,29 +57,41 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
             // filter out non-mutable attributes
             const attributes = user.Attributes.filter((attr: AttributeType) => attr.Name !== 'sub');
 
-
-            /**
-             * TODO: Fix InvalidParameterException: Username should be an email.
-             * in cases where UsernameAttributes in userpool is set to email or phone.
-             *
-             * Error: "Users can use an email address or phone number as their "username" to sign up and sign in."
-             * Possible solution: get `UsernameAttributes` from `describeUserPool` and decide accordingly.
-            **/
             const params: AdminCreateUserRequest = {
                 UserPoolId,
                 Username: user.Username,
-                DesiredDeliveryMediums: [],
-                MessageAction: 'SUPPRESS', // TODO: will be dependent on fixed temp pass or auto-created
-                ForceAliasCreation: false,
-                TemporaryPassword: 'qwerty1234', // TODO: take this from user; give option for auto creation by aws cognito
-                UserAttributes: attributes,
+                UserAttributes: attributes
             };
 
+            // Set Username as email if UsernameAttributes of UserPool contains email
+            // TODO: Check for phone number as well, also if user attribute passed has one
+            if (UsernameAttributes.includes('email')) {
+                params.Username = pluckValue(user.Attributes, 'email') as string;
+                params.DesiredDeliveryMediums = ['EMAIL']
+            } else if (UsernameAttributes.includes('phone_number')) {
+                params.Username = pluckValue(user.Attributes, 'phone_number') as string;
+                params.DesiredDeliveryMediums = ['EMAIL', 'SMS']
+            }
+
+            // if password is provided, use it silently
+            // else set a cognito generated one and send email (default)
+            if (password) {
+                params.MessageAction = 'SUPPRESS';
+                params.TemporaryPassword = password;
+            }
+
             const wrapped = limiter.wrap(async () => cognito.adminCreateUser(params).promise());
-            const response = await wrapped();
-            console.log(response);
+            await wrapped();
         };
     });
 
     readStream.pipe(parser);
+};
+
+const pluckValue = (arr: AttributeType[], key: string) => {
+    const object = arr.find((attr: AttributeType) => attr.Name == key);
+
+    if (!object) throw Error(`${key} not found in the user attribute`)
+
+    return object.Value;
 };
