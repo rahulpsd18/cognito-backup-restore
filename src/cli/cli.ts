@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import * as AWS from 'aws-sdk';
+import * as ora from 'ora';
+
 import chalk from 'chalk';
 import { backupUsers, restoreUsers } from '../index';
 import { options } from './options';
@@ -10,6 +12,7 @@ const green = chalk.green;
 const orange = chalk.keyword('orange');
 
 (async () => {
+    let spinner = ora({ spinner: 'dots4', hideCursor: true });
     try {
         const { mode, profile, region, key, secret, userpool, directory, file, password } = await options;
 
@@ -26,16 +29,18 @@ const orange = chalk.keyword('orange');
 
         const cognitoISP = new AWS.CognitoIdentityServiceProvider();
 
-        if(mode === 'backup') {
+        if (mode === 'backup') {
+            spinner = spinner.start(orange`Backing up userpool`);
             await backupUsers(cognitoISP, userpool, directory);
-            console.log(green(`JSON Exported successfully to ${directory}/\n`));
-        } else if(mode === 'restore') {
+            spinner.succeed(green(`JSON Exported successfully to ${directory}/\n`));
+        } else if (mode === 'restore') {
+            spinner = spinner.start(orange`Restoring userpool`);
             await restoreUsers(cognitoISP, userpool, file, password);
-            console.log(green(`Users imported successfully to ${userpool}\n`));
+            spinner.succeed(green(`Users imported successfully to ${userpool}\n`));
         } else {
-            console.log(red`Mode passed is invalid, please make sure a valid command is passed here.\n`);
+            spinner.fail(red`Mode passed is invalid, please make sure a valid command is passed here.\n`);
         }
     } catch (error) {
-        console.error(red(error.message));
+        spinner.fail(red(error.message));
     }
 })();
