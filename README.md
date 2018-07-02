@@ -36,7 +36,7 @@ import {backupUsers, restoreUsers} from 'cognito-backup-restore';
 const cognitoISP = new AWS.CognitoIdentityServiceProvider();
 
 // you may use async-await too
-backupUsers(cognitoISP, <USERPOOL-ID>, file)
+backupUsers(cognitoISP, <USERPOOL-ID>, <directory>)
   .then(() => console.log(`Backup completed`))
   .catch(console.error)
 ```

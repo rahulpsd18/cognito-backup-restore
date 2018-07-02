@@ -1,4 +1,5 @@
 import * as fs from 'fs';
+import * as path from 'path';
 import * as AWS from 'aws-sdk';
 import Bottleneck from 'bottleneck';
 
@@ -10,41 +11,53 @@ type AdminCreateUserRequest = AWS.CognitoIdentityServiceProvider.Types.AdminCrea
 type AttributeType = AWS.CognitoIdentityServiceProvider.Types.AttributeType;
 
 
-export const backupUsers = async (cognito: CognitoISP, userpoolId: string, file: string) => {
-    if (userpoolId == 'all') throw Error('Backing up all pools is not supported yet');
+export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string) => {
+    let userPoolList: string[] = [];
 
-    const writeStream = fs.createWriteStream(file);
-    const stringify = JSONStream.stringify();
-    stringify.pipe(writeStream);
+    if (UserPoolId == 'all') {
+        const { UserPools } = await cognito.listUserPools({ MaxResults: 60 }).promise();
+        userPoolList = userPoolList.concat(UserPools && UserPools.map(el => el.Id as string) as any);
+    } else {
+        userPoolList.push(UserPoolId);
+    }
 
-    const params: ListUsersRequestTypes = {
-        UserPoolId: userpoolId
-    };
+    for (let poolId of userPoolList) {
+        const file = path.join(directory, `${poolId}.json`)
+        const writeStream = fs.createWriteStream(file);
+        const stringify = JSONStream.stringify();
+        stringify.pipe(writeStream);
 
-    try {
-        const paginationCalls = async () => {
-            const { Users = [], PaginationToken } = await cognito.listUsers(params).promise();
-            Users.forEach(user => stringify.write(user as string));
-
-            if (PaginationToken) {
-                params.PaginationToken = PaginationToken;
-                await paginationCalls();
-            };
+        const params: ListUsersRequestTypes = {
+            UserPoolId: poolId
         };
 
-        await paginationCalls();
-    } catch (error) {
-        throw error // to be catched by calling function
-    } finally {
-        stringify.end();
-        stringify.on('end', () => {
-            writeStream.end();
-        })
+        try {
+            const paginationCalls = async () => {
+                const { Users = [], PaginationToken } = await cognito.listUsers(params).promise();
+                Users.forEach(user => stringify.write(user as string));
+
+                if (PaginationToken) {
+                    params.PaginationToken = PaginationToken;
+                    await paginationCalls();
+                };
+            };
+
+            await paginationCalls();
+        } catch (error) {
+            throw error; // to be catched by calling function
+        } finally {
+            stringify.end();
+            stringify.on('end', () => {
+                writeStream.end();
+            });
+        }
     }
 };
 
 
 export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string) => {
+    if (UserPoolId == 'all') throw Error(`'all' is not a acceptable value for UserPoolId`);
+
     const { UserPool } = await cognito.describeUserPool({ UserPoolId }).promise();
     const UsernameAttributes = UserPool && UserPool.UsernameAttributes || [];
 

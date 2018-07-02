@@ -79,7 +79,7 @@ export const argv = yargs
     })
     .option('userpool', {
         alias: ['pool'],
-        describe: dimmed`The Cognito pool to use`,
+        describe: dimmed`The Cognito pool to use. 'all' to backup all userpools.`,
         string: true
     })
 

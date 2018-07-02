@@ -1,5 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
 import * as AWS from 'aws-sdk';
 import * as fuzzy from 'fuzzy';
 import * as inquirer from 'inquirer';
@@ -44,7 +42,7 @@ const searchCognitoRegion = async (_: never, input: string) => {
 };
 
 const verifyOptions = async () => {
-    let { mode, profile, region, key, secret, userpool, file, password } = argv;
+    let { mode, profile, region, key, secret, userpool, directory, file, password } = argv;
 
     // choose the mode if not passed through CLI or invalid is passed
     if (!mode || !['restore', 'backup'].includes(mode)) {
@@ -128,23 +126,18 @@ const verifyOptions = async () => {
         userpool = cognitoPoolChoice.selected;
     }
 
-    if (!file) {
-        const fileLocation = await inquirer.prompt({
+    if (mode === 'backup' && !directory) {
+        const directoryLocation = await inquirer.prompt({
             type: 'directory',
             name: 'selected',
             message: 'Choose your file destination',
             basePath: '.'
         } as inquirer.Question);
 
-        // TODO: fix this
-        // file = path.join(fileLocation.selected, 'CognitoBackups');
-
-        // create the folder if not exists
-        // !fs.existsSync(file) && fs.mkdirSync(file);
-        file = path.join(fileLocation.selected, `${userpool}.json`);
+        directory = directoryLocation.selected;
     }
 
-    return { mode, profile, region, key, secret, userpool, file, password }
+    return { mode, profile, region, key, secret, userpool, directory, file, password }
 };
 
 

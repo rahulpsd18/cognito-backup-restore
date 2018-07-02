@@ -11,7 +11,7 @@ const orange = chalk.keyword('orange');
 
 (async () => {
     try {
-        const { mode, profile, region, key, secret, userpool, file, password } = await options;
+        const { mode, profile, region, key, secret, userpool, directory, file, password } = await options;
 
         // update the config of aws-sdk based on profile/credentials passed
         AWS.config.update({ region });
@@ -27,8 +27,8 @@ const orange = chalk.keyword('orange');
         const cognitoISP = new AWS.CognitoIdentityServiceProvider();
 
         if(mode === 'backup') {
-            await backupUsers(cognitoISP, userpool, file);
-            console.log(green`JSON Exported successfully to ${file}\n`);
+            await backupUsers(cognitoISP, userpool, directory);
+            console.log(green(`JSON Exported successfully to ${directory}/\n`));
         } else if(mode === 'restore') {
             await restoreUsers(cognitoISP, userpool, file, password);
             console.log(green(`Users imported successfully to ${userpool}\n`));
