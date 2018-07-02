@@ -23,7 +23,7 @@ npm install -g cognito-backup-restore
 
 ## Usage
 
-`cognito-backup-restore` can be used by importing them directly or via [CLI](#cli).
+`cognito-backup-restore` can be used by importing it directly or via [CLI](#cli) (recommended).
 
 ### Imports
 
@@ -38,6 +38,10 @@ const cognitoISP = new AWS.CognitoIdentityServiceProvider();
 // you may use async-await too
 backupUsers(cognitoISP, <USERPOOL-ID>, <directory>)
   .then(() => console.log(`Backup completed`))
+  .catch(console.error)
+
+restoreUsers(cognitoISP, <USERPOOL-ID>, <JSON-File>, <Password?>)
+  .then(() => console.log(`Restore completed`))
   .catch(console.error)
 ```
 
@@ -63,6 +67,8 @@ cbr <command> [options]
 >
 > `--aws-secret-key` `--secret`: The AWS Secret Key to use. Not to be passed when using `--profile`.
 
+![Image showing CLI Usage](gifs/demo.png "CLI Usage")
+
 - **Backup**
   ```shell
   cbr backup
@@ -70,13 +76,18 @@ cbr <command> [options]
   ```
   `--directory` option is available to export json data to.
 
+  ![GIF for using Backup CLI](gifs/backup-min.gif "Backup Demo")
+
 - **Restore**
   ```shell
   cbr restore
   cbr restore <options>
   ```
   `--file` option is available to read the json file to import from.
-  `--pwd` option is available to set TemporaryPassword of the users.
+
+  `--pwd` option is available to set TemporaryPassword of the users. If not provided, cognito generated password will be used and email will be sent to the users with One Time Password.
+
+  ![GIF for using Restore CLI](gifs/restore-min.gif "Restore Demo")
 
 **In case any of the required option is missing, a interactive command line user interface kicks in to select from.**
 
@@ -84,7 +95,7 @@ cbr <command> [options]
 
 - [X] ~~Fine tune the backup process~~
 - [X] ~~Implement Restore~~
-- [ ] Write detailed Readme with examples
+- [X] ~~Write detailed Readme with examples~~
 - [ ] Convert JSON to CSV
 - [ ] Implement Amazon Cognito User Pool Import Job
 - [ ] AWS Cross-Region Cognito Replication
