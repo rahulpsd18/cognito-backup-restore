@@ -8,6 +8,7 @@ const SharedIniFile = require('aws-sdk/lib/shared_ini');
 
 inquirer.registerPrompt('directory', require('inquirer-select-directory'));
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
+inquirer.registerPrompt('filePath', require('inquirer-file-path'));
 
 const greenify = chalk.green;
 const savedAWSProfiles = new SharedIniFile().getProfiles();
@@ -67,7 +68,7 @@ const verifyOptions = async () => {
         } as inquirer.Question);
 
         profile = awsProfileChoice.selected;
-    }
+    };
 
     // choose your region if not passed through CLI
     if (!region) {
@@ -79,7 +80,7 @@ const verifyOptions = async () => {
         } as inquirer.Question);
 
         region = awsRegionChoice.selected;
-    }
+    };
 
     if (!userpool) {
         // update the config of aws-sdk based on profile/credentials passed
@@ -124,7 +125,7 @@ const verifyOptions = async () => {
         } as inquirer.Question);
 
         userpool = cognitoPoolChoice.selected;
-    }
+    };
 
     if (mode === 'backup' && !directory) {
         const directoryLocation = await inquirer.prompt({
@@ -135,6 +136,17 @@ const verifyOptions = async () => {
         } as inquirer.Question);
 
         directory = directoryLocation.selected;
+    };
+
+    if (mode === 'restore' && !file) {
+        const fileLocation = await inquirer.prompt({
+            type: 'filePath',
+            name: 'selected',
+            message: 'Choose the JSON file',
+            basePath: '.'
+        } as inquirer.Question);
+
+        file = fileLocation.selected;
     }
 
     return { mode, profile, region, key, secret, userpool, directory, file, password }

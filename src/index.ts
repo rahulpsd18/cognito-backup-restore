@@ -15,6 +15,7 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
     let userPoolList: string[] = [];
 
     if (UserPoolId == 'all') {
+        // TODO: handle data.NextToken when exceeding the MaxResult limit
         const { UserPools } = await cognito.listUserPools({ MaxResults: 60 }).promise();
         userPoolList = userPoolList.concat(UserPools && UserPools.map(el => el.Id as string) as any);
     } else {
@@ -22,9 +23,14 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
     }
 
     for (let poolId of userPoolList) {
+
+        // create directory if not exists
+        !fs.existsSync(directory) && fs.mkdirSync(directory)
+
         const file = path.join(directory, `${poolId}.json`)
         const writeStream = fs.createWriteStream(file);
         const stringify = JSONStream.stringify();
+
         stringify.pipe(writeStream);
 
         const params: ListUsersRequestTypes = {
@@ -77,7 +83,6 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
             };
 
             // Set Username as email if UsernameAttributes of UserPool contains email
-            // TODO: Check for phone number as well, also if user attribute passed has one
             if (UsernameAttributes.includes('email')) {
                 params.Username = pluckValue(user.Attributes, 'email') as string;
                 params.DesiredDeliveryMediums = ['EMAIL']

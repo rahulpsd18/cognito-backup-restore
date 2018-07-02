@@ -82,9 +82,9 @@ cbr <command> [options]
 
 ## Todo
 
-- [X] ~~Add Readme~~
 - [X] ~~Fine tune the backup process~~
 - [X] ~~Implement Restore~~
+- [ ] Write detailed Readme with examples
 - [ ] Convert JSON to CSV
 - [ ] Implement Amazon Cognito User Pool Import Job
 - [ ] AWS Cross-Region Cognito Replication
