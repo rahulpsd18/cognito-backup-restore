@@ -150,7 +150,6 @@ const verifyOptions = async () => {
     }
 
     if (mode === 'restore' && passwordModulePath) {
-        console.log(passwordModulePath);
         try {
             const pwdModule = require(passwordModulePath);
             if (typeof pwdModule.getPwdForUsername !== 'function') {
