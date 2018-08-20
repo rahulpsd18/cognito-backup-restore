@@ -61,8 +61,12 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
 };
 
 
-export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string) => {
+export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string, passwordModulePath?: String) => {
     if (UserPoolId == 'all') throw Error(`'all' is not a acceptable value for UserPoolId`);
+    let pwdModule: any = null;
+    if (typeof passwordModulePath === 'string') {
+        pwdModule = require(passwordModulePath);
+    }
 
     const { UserPool } = await cognito.describeUserPool({ UserPoolId }).promise();
     const UsernameAttributes = UserPool && UserPool.UsernameAttributes || [];
@@ -91,13 +95,23 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
                 params.DesiredDeliveryMediums = ['EMAIL', 'SMS']
             }
 
+            // If password module is specified, use it silently
+            // if not provided or it throws, we fallback to password if provided
             // if password is provided, use it silently
             // else set a cognito generated one and send email (default)
-            if (password) {
+            let specificPwdExistsForUser = false;
+            if (pwdModule !== null){
+                try {
+                    params.MessageAction = 'SUPPRESS';
+                    params.TemporaryPassword = pwdModule.getPwdForUsername(user.Username);
+                    specificPwdExistsForUser = true;
+                } catch (e) {
+                }
+            }
+            if (!specificPwdExistsForUser && password) {
                 params.MessageAction = 'SUPPRESS';
                 params.TemporaryPassword = password;
             }
-
             const wrapped = limiter.wrap(async () => cognito.adminCreateUser(params).promise());
             await wrapped();
         };

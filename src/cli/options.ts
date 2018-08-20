@@ -43,7 +43,7 @@ const searchCognitoRegion = async (_: never, input: string) => {
 };
 
 const verifyOptions = async () => {
-    let { mode, profile, region, key, secret, userpool, directory, file, password } = argv;
+    let { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath } = argv;
 
     // choose the mode if not passed through CLI or invalid is passed
     if (!mode || !['restore', 'backup'].includes(mode)) {
@@ -149,7 +149,18 @@ const verifyOptions = async () => {
         file = fileLocation.selected;
     }
 
-    return { mode, profile, region, key, secret, userpool, directory, file, password }
+    if (mode === 'restore' && passwordModulePath) {
+        console.log(passwordModulePath);
+        try {
+            const pwdModule = require(passwordModulePath);
+            if (typeof pwdModule.getPwdForUsername !== 'function') {
+                throw Error(`Cannot find getPwdForUsername(username: String) in password module "${passwordModulePath}".`);
+            };
+        } catch(e) {
+            throw Error(`Cannot load password module path "${passwordModulePath}".`);
+        }
+    }
+    return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath }
 };
 
 
