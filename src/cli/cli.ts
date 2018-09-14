@@ -14,7 +14,7 @@ const orange = chalk.keyword('orange');
 (async () => {
     let spinner = ora({ spinner: 'dots4', hideCursor: true });
     try {
-        const { mode, profile, region, key, secret, userpool, directory, file, password } = await options;
+        const { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath } = await options;
 
         // update the config of aws-sdk based on profile/credentials passed
         AWS.config.update({ region });
@@ -35,7 +35,7 @@ const orange = chalk.keyword('orange');
             spinner.succeed(green(`JSON Exported successfully to ${directory}/\n`));
         } else if (mode === 'restore') {
             spinner = spinner.start(orange`Restoring userpool`);
-            await restoreUsers(cognitoISP, userpool, file, password);
+            await restoreUsers(cognitoISP, userpool, file, password, passwordModulePath);
             spinner.succeed(green(`Users imported successfully to ${userpool}\n`));
         } else {
             spinner.fail(red`Mode passed is invalid, please make sure a valid command is passed here.\n`);

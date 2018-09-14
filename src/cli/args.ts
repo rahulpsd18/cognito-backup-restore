@@ -43,6 +43,11 @@ export const argv = yargs
                 alias: ['pwd'],
                 describe: dimmed`TemporaryPassword of the users imported`,
                 string: true
+            },
+            passwordModulePath: {
+                alias: ["pwdModule"],
+                describe: dimmed`A module that exports an interface getPwdForUsername(username: String) method, fall back to password parameter if throw`,
+                string: true
             }
         });
     })
