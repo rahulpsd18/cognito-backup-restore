@@ -87,6 +87,8 @@ cbr <command> [options]
 
   `--pwd` option is available to set TemporaryPassword of the users. If not provided, cognito generated password will be used and email will be sent to the users with One Time Password.
 
+  `--pwdModule` option is available to make use of custom logic to generate password. If not provided, cognito generated password will be used and email will be sent to the users with One Time Password, unless `--pwd` is used. Make sure to pass absolute path of the file. Refer [this](https://github.com/rahulpsd18/cognito-backup-restore/pull/1).
+
   ![GIF for using Restore CLI](gifs/restore-min.gif "Restore Demo")
 
 **In case any of the required option is missing, a interactive command line user interface kicks in to select from.**

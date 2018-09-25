@@ -1,4 +1,5 @@
 src/
+gifs/
 build/cli/*.d.ts
 
 .vscode
