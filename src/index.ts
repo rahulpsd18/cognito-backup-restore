@@ -106,6 +106,7 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
                     params.TemporaryPassword = pwdModule.getPwdForUsername(user.Username);
                     specificPwdExistsForUser = true;
                 } catch (e) {
+                    console.error(`"${e.message}" error occurred for user "${params.Username}" while getting password from ${passwordModulePath}. Falling back to default.`);
                 }
             }
             if (!specificPwdExistsForUser && password) {
