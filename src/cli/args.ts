@@ -54,7 +54,7 @@ export const argv = yargs
 
     // examples
     .example('$0 backup', greyed`Follow the interactive guide to backup userpool(s)`)
-    .example('$0 restore', greyed`Follow the interactive guide to backup userpool`)
+    .example('$0 restore', greyed`Follow the interactive guide to restore userpool`)
     .example('$0 backup -p <PROFILE> [OPTIONS]', greyed`Backup using the options provided`)
     .example('$0 restore -p <PROFILE> [OPTIONS]', greyed`Restore using the options provided`)
 
