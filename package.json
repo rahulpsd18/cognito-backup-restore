@@ -1,6 +1,6 @@
 {
   "name": "cognito-backup-restore",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "AIO Tool for backing up and restoring AWS Cognito User Pools",
   "main": "build/index.js",
   "scripts": {
@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "JSONStream": "^1.3.3",
-    "aws-sdk": "^2.259.1",
+    "aws-sdk": "^2.343.0",
     "bottleneck": "^2.5.0",
     "chalk": "^2.4.1",
     "fuzzy": "^0.1.3",

@@ -4,14 +4,13 @@ import * as inquirer from 'inquirer';
 import chalk from 'chalk';
 import { argv } from './args';
 
-const SharedIniFile = require('aws-sdk/lib/shared_ini');
-
 inquirer.registerPrompt('directory', require('inquirer-select-directory'));
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
 inquirer.registerPrompt('filePath', require('inquirer-file-path'));
 
 const greenify = chalk.green;
-const savedAWSProfiles = new SharedIniFile().getProfiles();
+const credentials = new AWS.IniLoader().loadFrom({});
+const savedAWSProfiles = Object.keys(credentials);
 
 const searchAWSProfile = async (_: never, input: string) => {
     input = input || '';
