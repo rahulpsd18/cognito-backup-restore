@@ -28,6 +28,15 @@
         "code",
         "ideas"
       ]
+    },
+    {
+      "login": "alvarodelvalle",
+      "name": "Alvaro Del Valle",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/32401961?v=4",
+      "profile": "http://gardlabs.com",
+      "contributions": [
+        "question"
+      ]
     }
   ],
   "contributorsPerLine": 7
