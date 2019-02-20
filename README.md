@@ -1,5 +1,5 @@
 # cognito-backup-restore
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors)
 
 AIO Tool for backing up and restoring AWS Cognito User Pools
 
@@ -109,8 +109,8 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore -->
-| [<img src="https://avatars1.githubusercontent.com/u/30614870?v=4" width="100px;" alt="adityamedhe-cc"/><br /><sub><b>adityamedhe-cc</b></sub>](https://github.com/adityamedhe-cc)<br />[📖](https://github.com/rahulpsd18/cognito-backup-restore/commits?author=adityamedhe-cc "Documentation") [💻](https://github.com/rahulpsd18/cognito-backup-restore/commits?author=adityamedhe-cc "Code") | [<img src="https://avatars1.githubusercontent.com/u/18159739?v=4" width="100px;" alt="juno-visualsquares"/><br /><sub><b>juno-visualsquares</b></sub>](https://github.com/juno-visualsquares)<br />[💻](https://github.com/rahulpsd18/cognito-backup-restore/commits?author=juno-visualsquares "Code") [🤔](#ideas-juno-visualsquares "Ideas, Planning, & Feedback") |
-| :---: | :---: |
+| [<img src="https://avatars1.githubusercontent.com/u/30614870?v=4" width="100px;" alt="adityamedhe-cc"/><br /><sub><b>adityamedhe-cc</b></sub>](https://github.com/adityamedhe-cc)<br />[📖](https://github.com/rahulpsd18/cognito-backup-restore/commits?author=adityamedhe-cc "Documentation") [💻](https://github.com/rahulpsd18/cognito-backup-restore/commits?author=adityamedhe-cc "Code") | [<img src="https://avatars1.githubusercontent.com/u/18159739?v=4" width="100px;" alt="juno-visualsquares"/><br /><sub><b>juno-visualsquares</b></sub>](https://github.com/juno-visualsquares)<br />[💻](https://github.com/rahulpsd18/cognito-backup-restore/commits?author=juno-visualsquares "Code") [🤔](#ideas-juno-visualsquares "Ideas, Planning, & Feedback") | [<img src="https://avatars3.githubusercontent.com/u/32401961?v=4" width="100px;" alt="Alvaro Del Valle"/><br /><sub><b>Alvaro Del Valle</b></sub>](http://gardlabs.com)<br />[💬](#question-alvarodelvalle "Answering Questions") |
+| :---: | :---: | :---: |
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
