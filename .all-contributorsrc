@@ -30,6 +30,15 @@
       ]
     },
     {
+      "login": "carbonrobot",
+      "name": "Charlie Brown",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/1521394?v=4",
+      "profile": "http://www.carbonatethis.com",
+      "contributions": [
+        "bug"
+      ]
+    },
+    {
       "login": "alvarodelvalle",
       "name": "Alvaro Del Valle",
       "avatar_url": "https://avatars3.githubusercontent.com/u/32401961?v=4",
