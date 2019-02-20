@@ -18,6 +18,16 @@
         "doc",
         "code"
       ]
+    },
+    {
+      "login": "juno-visualsquares",
+      "name": "juno-visualsquares",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/18159739?v=4",
+      "profile": "https://github.com/juno-visualsquares",
+      "contributions": [
+        "code",
+        "ideas"
+      ]
     }
   ],
   "contributorsPerLine": 7
