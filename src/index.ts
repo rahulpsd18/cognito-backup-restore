@@ -117,7 +117,7 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
             try {
                await wrapped();
             } catch (e) {
-              if (e.message === 'An account with the given email already exists.') {
+              if (e.code === 'UsernameExistsException') {
                   console.log(`Looks like user ${user.Username} already exists, ignoring.`)
               } else {
                 throw e;
