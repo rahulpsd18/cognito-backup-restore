@@ -114,7 +114,15 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
                 params.TemporaryPassword = password;
             }
             const wrapped = limiter.wrap(async () => cognito.adminCreateUser(params).promise());
-            await wrapped();
+            try {
+               await wrapped();
+            } catch (e) {
+              if (e.code === 'UsernameExistsException') {
+                  console.log(`Looks like user ${user.Username} already exists, ignoring.`)
+              } else {
+                throw e;
+              }
+            }
         };
     });
 
