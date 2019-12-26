@@ -88,7 +88,7 @@ export const argv = yargs
         string: true
     })
     .option('delay', {
-        describe: 'delay in milliseconds to be use while fetching users from userpools(in batch of 60) to avoid rate exceed error. Default is value 0',
+        describe: dimmed`delay in millis between alternate users batch(60) backup, to avoid rate limit error`,
         number: true
     })
 
