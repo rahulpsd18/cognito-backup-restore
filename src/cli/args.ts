@@ -87,6 +87,10 @@ export const argv = yargs
         describe: dimmed`The Cognito pool to use. 'all' to backup all userpools.`,
         string: true
     })
+    .option('delay', {
+        describe: 'delay in milliseconds to be use while fetching users from userpools(in batch of 60) to avoid rate exceed error. Default is value 0',
+        number: true
+    })
 
     // help
     .help('help', dimmed`Show help`)

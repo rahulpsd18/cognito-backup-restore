@@ -42,7 +42,7 @@ const searchCognitoRegion = async (_: never, input: string) => {
 };
 
 const verifyOptions = async () => {
-    let { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath } = argv;
+    let { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay } = argv;
 
     // choose the mode if not passed through CLI or invalid is passed
     if (!mode || !['restore', 'backup'].includes(mode)) {
@@ -158,7 +158,7 @@ const verifyOptions = async () => {
             throw Error(`Cannot load password module path "${passwordModulePath}".`);
         }
     }
-    return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath }
+    return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay }
 };
 
 
