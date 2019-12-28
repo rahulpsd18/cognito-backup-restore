@@ -3,6 +3,7 @@ import * as fuzzy from 'fuzzy';
 import * as inquirer from 'inquirer';
 import chalk from 'chalk';
 import { argv } from './args';
+import {OutputFormat} from "../../build/OutputFormat";
 
 inquirer.registerPrompt('directory', require('inquirer-select-directory'));
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
@@ -42,7 +43,7 @@ const searchCognitoRegion = async (_: never, input: string) => {
 };
 
 const verifyOptions = async () => {
-    let { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay } = argv;
+    let { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, outputFormat } = argv;
 
     // choose the mode if not passed through CLI or invalid is passed
     if (!mode || !['restore', 'backup'].includes(mode)) {
@@ -158,7 +159,12 @@ const verifyOptions = async () => {
             throw Error(`Cannot load password module path "${passwordModulePath}".`);
         }
     }
-    return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay }
+
+    if (outputFormat && outputFormat !== OutputFormat.JSON && outputFormat !== OutputFormat.CSV) {
+        throw Error(`Unsupported output format ${outputFormat}. Only json and csv format are supported`)
+    }
+
+    return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, outputFormat }
 };
 
 

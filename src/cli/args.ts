@@ -91,6 +91,11 @@ export const argv = yargs
         describe: dimmed`delay in millis between alternate users batch(60) backup, to avoid rate limit error`,
         number: true
     })
+    .option('outputFormat', {
+        alias: ['o'],
+        describe: dimmed`Format in which backup file has to writen. Support format: json, csv`,
+        string: true
+    })
 
     // help
     .help('help', dimmed`Show help`)
