@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as AWS from 'aws-sdk';
 import Bottleneck from 'bottleneck';
 import * as delay from "delay";
+import Writer from './writer';
 
 const JSONStream = require('JSONStream');
 
@@ -11,13 +12,17 @@ type ListUsersRequestTypes = AWS.CognitoIdentityServiceProvider.Types.ListUsersR
 type AdminCreateUserRequest = AWS.CognitoIdentityServiceProvider.Types.AdminCreateUserRequest;
 type AttributeType = AWS.CognitoIdentityServiceProvider.Types.AttributeType;
 
+enum OutputFormat {
+    JSON = 'json',
+    CSV = 'csv'
+}
 
-export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string, delayDurationInMillis: number = 0) => {
+export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string, delayDurationInMillis: number = 0, outputFormat: OutputFormat = OutputFormat.JSON ) => {
     let userPoolList: string[] = [];
 
     if (UserPoolId == 'all') {
         // TODO: handle data.NextToken when exceeding the MaxResult limit
-        const { UserPools } = await cognito.listUserPools({ MaxResults: 60 }).promise();
+        const {UserPools} = await cognito.listUserPools({MaxResults: 60}).promise();
         userPoolList = userPoolList.concat(UserPools && UserPools.map(el => el.Id as string) as any);
     } else {
         userPoolList.push(UserPoolId);
@@ -30,9 +35,9 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
 
         const file = path.join(directory, `${poolId}.json`)
         const writeStream = fs.createWriteStream(file);
-        const stringify = JSONStream.stringify();
+        const writer = outputFormat === OutputFormat.JSON ? Writer.JsonWriter(writeStream) : Writer.CsvWriter(writeStream);
 
-        stringify.pipe(writeStream);
+        // writer.pipe(writeStream);
 
         const params: ListUsersRequestTypes = {
             UserPoolId: poolId
@@ -40,8 +45,8 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
 
         try {
             const paginationCalls = async () => {
-                const { Users = [], PaginationToken } = await cognito.listUsers(params).promise();
-                Users.forEach(user => stringify.write(user as string));
+                const {Users = [], PaginationToken} = await cognito.listUsers(params).promise();
+                Users.forEach(user => writer.write(user as string));
 
                 if (PaginationToken) {
                     params.PaginationToken = PaginationToken;
@@ -56,10 +61,8 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
         } catch (error) {
             throw error; // to be catched by calling function
         } finally {
-            stringify.end();
-            stringify.on('end', () => {
-                writeStream.end();
-            });
+            writer.end();
+            writer.onEnd(() => writeStream.end());
         }
     }
 };
@@ -72,10 +75,10 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
         pwdModule = require(passwordModulePath);
     }
 
-    const { UserPool } = await cognito.describeUserPool({ UserPoolId }).promise();
+    const {UserPool} = await cognito.describeUserPool({UserPoolId}).promise();
     const UsernameAttributes = UserPool && UserPool.UsernameAttributes || [];
 
-    const limiter = new Bottleneck({ minTime: 2000 });
+    const limiter = new Bottleneck({minTime: 2000});
     const readStream = fs.createReadStream(file);
     const parser = JSONStream.parse();
 
@@ -104,7 +107,7 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
             // if password is provided, use it silently
             // else set a cognito generated one and send email (default)
             let specificPwdExistsForUser = false;
-            if (pwdModule !== null){
+            if (pwdModule !== null) {
                 try {
                     params.MessageAction = 'SUPPRESS';
                     params.TemporaryPassword = pwdModule.getPwdForUsername(user.Username);
@@ -119,15 +122,15 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
             }
             const wrapped = limiter.wrap(async () => cognito.adminCreateUser(params).promise());
             try {
-               await wrapped();
+                await wrapped();
             } catch (e) {
-              if (e.code === 'UsernameExistsException') {
-                  console.log(`Looks like user ${user.Username} already exists, ignoring.`)
-              } else {
-                throw e;
-              }
+                if (e.code === 'UsernameExistsException') {
+                    console.log(`Looks like user ${user.Username} already exists, ignoring.`)
+                } else {
+                    throw e;
+                }
             }
-        };
+        }
     });
 
     readStream.pipe(parser);
