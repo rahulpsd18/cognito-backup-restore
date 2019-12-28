@@ -67,6 +67,8 @@ cbr <command> [options]
 > `--aws-access-key` `--key`: The AWS Access Key to use. Not to be passed when using `--profile`.
 >
 > `--aws-secret-key` `--secret`: The AWS Secret Key to use. Not to be passed when using `--profile`.
+>
+> `--delay`: delay in millis between alternate users batch(60) backup, to avoid rate limit error.
 
 ![Image showing CLI Usage](gifs/demo.png "CLI Usage")
 
