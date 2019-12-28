@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as AWS from 'aws-sdk';
 import Bottleneck from 'bottleneck';
+import * as delay from "delay";
 
 const JSONStream = require('JSONStream');
 
@@ -11,7 +12,7 @@ type AdminCreateUserRequest = AWS.CognitoIdentityServiceProvider.Types.AdminCrea
 type AttributeType = AWS.CognitoIdentityServiceProvider.Types.AttributeType;
 
 
-export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string) => {
+export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string, delayDurationInMillis: number = 0) => {
     let userPoolList: string[] = [];
 
     if (UserPoolId == 'all') {
@@ -44,6 +45,9 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
 
                 if (PaginationToken) {
                     params.PaginationToken = PaginationToken;
+                    if(delayDurationInMillis > 0) {
+                        await delay(delayDurationInMillis);
+                    }
                     await paginationCalls();
                 };
             };
@@ -61,7 +65,7 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
 };
 
 
-export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string, passwordModulePath?: String) => {
+export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string, passwordModulePath?: String, delayDurationInMillis: number = 0) => {
     if (UserPoolId == 'all') throw Error(`'all' is not a acceptable value for UserPoolId`);
     let pwdModule: any = null;
     if (typeof passwordModulePath === 'string') {
