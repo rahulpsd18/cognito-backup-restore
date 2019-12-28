@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as AWS from 'aws-sdk';
 import Bottleneck from 'bottleneck';
 import * as delay from "delay";
-import Writer from './writer';
+import {JsonWriter, CsvWriter } from './writer';
 
 const JSONStream = require('JSONStream');
 
@@ -33,9 +33,10 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
         // create directory if not exists
         !fs.existsSync(directory) && fs.mkdirSync(directory)
 
-        const file = path.join(directory, `${poolId}.json`)
+        const fileExtension = outputFormat === OutputFormat.JSON ? '.json' : '.csv';
+        const file = path.join(directory, `${poolId}${fileExtension}`);
         const writeStream = fs.createWriteStream(file);
-        const writer = outputFormat === OutputFormat.JSON ? Writer.JsonWriter(writeStream) : Writer.CsvWriter(writeStream);
+        const writer = outputFormat === OutputFormat.JSON ? new JsonWriter(writeStream) : new CsvWriter(writeStream);
 
         // writer.pipe(writeStream);
 

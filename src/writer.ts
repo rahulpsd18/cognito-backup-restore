@@ -31,19 +31,17 @@ const fields = [
     getFieldExtractorForAttribute("email"),
 ];
 
-export default class Writer {
-    private readonly encoder: any;
-    private readonly writeStream: any;
+abstract class Writer {
+    readonly encoder: any;
+    readonly writeStream: any;
 
-    private constructor(writeStream: any, encoder: any) {
+    protected constructor(writeStream: any, encoder: any) {
         this.encoder = encoder;
         this.writeStream = writeStream;
         this.encoder.pipe(this.writeStream);
     }
 
-    public write(user: any): void {
-        this.encoder.write(user as string);
-    }
+    public abstract write(user: any): void
 
     public onEnd(onEndCallBack:any): void {
         this.encoder.on('end', onEndCallBack);
@@ -52,13 +50,25 @@ export default class Writer {
     public end(): void {
         this.encoder.end();
     }
+}
 
-    public static CsvWriter(writeStream: any): Writer {
+export class CsvWriter extends Writer {
+    constructor(writeStream:any) {
         const encoder = new Transform({fields});
-        return new Writer(writeStream, encoder);
+        super(writeStream, encoder);
     }
 
-    public static JsonWriter(writeStream: any): Writer {
-        return new Writer(writeStream, JSONStream.stringify())
+    write(user: any): void {
+        this.encoder.write(JSON.stringify(user))
+    }
+}
+
+export class JsonWriter extends Writer {
+    constructor(writeStream: any) {
+        super(writeStream, JSONStream.stringify());
+    }
+
+    write(user: any): void {
+        this.encoder.write(user as string)
     }
 }
