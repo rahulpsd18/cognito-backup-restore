@@ -57,6 +57,7 @@
     "inquirer-autocomplete-prompt": "^0.12.2",
     "inquirer-file-path": "^1.0.1",
     "inquirer-select-directory": "^1.2.0",
+    "json2csv": "4.5.4",
     "ora": "^2.1.0",
     "yargs": "^11.0.0"
   }
