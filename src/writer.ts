@@ -29,6 +29,21 @@ const fields = [
     "UserStatus",
     getFieldExtractorForAttribute("phone_number"),
     getFieldExtractorForAttribute("email"),
+    getFieldExtractorForAttribute("name"),
+    getFieldExtractorForAttribute("middle_name"),
+    getFieldExtractorForAttribute("given_name"),
+    getFieldExtractorForAttribute("family_name"),
+    getFieldExtractorForAttribute("nickname"),
+    getFieldExtractorForAttribute("address"),
+    getFieldExtractorForAttribute("birthdate"),
+    getFieldExtractorForAttribute("gender"),
+    getFieldExtractorForAttribute("locale"),
+    getFieldExtractorForAttribute("picture"),
+    getFieldExtractorForAttribute("preferred_username"),
+    getFieldExtractorForAttribute("profile"),
+    getFieldExtractorForAttribute("timezone"),
+    getFieldExtractorForAttribute("updated_at"),
+    getFieldExtractorForAttribute("website")
 ];
 
 abstract class Writer {
