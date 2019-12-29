@@ -160,10 +160,22 @@ const verifyOptions = async () => {
         }
     }
 
-    if (outputFormat && outputFormat !== OutputFormat.JSON && outputFormat !== OutputFormat.CSV) {
-        throw Error(`Unsupported output format ${outputFormat}. Only json and csv format are supported`)
+    if (!outputFormat) {
+        const modeChoice = await inquirer.prompt<{ selected: string }>({
+            type: 'list',
+            name: 'selected',
+            message: 'Choose the output file format',
+            choices: ['json', 'csv'],
+            default: 'json'
+        });
+
+        outputFormat = modeChoice.selected;
     }
 
+    if (outputFormat !== OutputFormat.JSON && outputFormat !== OutputFormat.CSV) {
+        throw Error(`Unsupported output format ${outputFormat}. Only json and csv format are supported`)
+    }
+    
     return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, outputFormat }
 };
 
