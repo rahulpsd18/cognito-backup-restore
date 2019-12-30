@@ -158,7 +158,7 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
 
     parser.on('data', async (data: any[]) => {
         if(isCsvFile(file)) {
-            return await registerUser(data, getUserAttributesFromCsv)
+            await registerUser(data, getUserAttributesFromCsv)
         }
         for (let user of data) {
             await registerUser(user, getUserAttributesFromJson)

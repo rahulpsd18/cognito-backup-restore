@@ -24,7 +24,12 @@ export const argv = yargs
                 describe: dimmed`Directory to export json file to`,
                 string: true
             }
-        });
+        })
+            .option('outputFormat', {
+                alias: ['o'],
+                describe: dimmed`Format in which backup file has to writen. Support format: json, csv`,
+                string: true
+            });
     })
 
     // restore command
@@ -91,11 +96,6 @@ export const argv = yargs
         describe: dimmed`delay in millis between alternate users batch(60) backup, to avoid rate limit error`,
         number: true
     })
-    .option('outputFormat', {
-        alias: ['o'],
-        describe: dimmed`Format in which backup file has to writen. Support format: json, csv`,
-        string: true
-    })
 
     // help
     .help('help', dimmed`Show help`)
@@ -103,7 +103,9 @@ export const argv = yargs
     .showHelpOnFail(false, bold`Specify --help for available options`)
 
     // version
-    .version('version', dimmed`Show version number`, (function () { return version; })())
+    .version('version', dimmed`Show version number`, (function () {
+        return version;
+    })())
     .alias('version', 'v')
 
     // footer

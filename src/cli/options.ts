@@ -127,7 +127,7 @@ const verifyOptions = async () => {
         userpool = cognitoPoolChoice.selected;
     };
 
-    if (mode === 'backup' && !directory) {
+    if (isBackup(mode) && !directory) {
         const directoryLocation = await inquirer.prompt({
             type: 'directory',
             name: 'selected',
@@ -138,7 +138,7 @@ const verifyOptions = async () => {
         directory = directoryLocation.selected;
     };
 
-    if (mode === 'restore' && !file) {
+    if (isRestore(mode) && !file) {
         const fileLocation = await inquirer.prompt({
             type: 'filePath',
             name: 'selected',
@@ -149,7 +149,7 @@ const verifyOptions = async () => {
         file = fileLocation.selected;
     }
 
-    if (mode === 'restore' && passwordModulePath) {
+    if (isRestore(mode) && passwordModulePath) {
         try {
             const pwdModule = require(passwordModulePath);
             if (typeof pwdModule.getPwdForUsername !== 'function') {
@@ -160,7 +160,7 @@ const verifyOptions = async () => {
         }
     }
 
-    if (!outputFormat) {
+    if (isBackup(mode) && !outputFormat) {
         const modeChoice = await inquirer.prompt<{ selected: string }>({
             type: 'list',
             name: 'selected',
@@ -172,12 +172,14 @@ const verifyOptions = async () => {
         outputFormat = modeChoice.selected;
     }
 
-    if (outputFormat !== OutputFormat.JSON && outputFormat !== OutputFormat.CSV) {
+    if (outputFormat && outputFormat !== OutputFormat.JSON && outputFormat !== OutputFormat.CSV) {
         throw Error(`Unsupported output format ${outputFormat}. Only json and csv format are supported`)
     }
     
     return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, outputFormat }
 };
 
+const isBackup = (mode:string):boolean => mode === 'backup';
+const isRestore = (mode:string):boolean => mode === 'restore';
 
 export const options = verifyOptions();
