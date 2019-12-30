@@ -46,7 +46,17 @@
       "contributions": [
         "question"
       ]
+    },
+    {
+      "login": "vladistan",
+      "name": "Vlad Korolev",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/36257?v=4",
+      "profile": "http://blog.v-lad.org",
+      "contributions": [
+        "code"
+      ]
     }
   ],
-  "contributorsPerLine": 7
+  "contributorsPerLine": 7,
+  "skipCi": true
 }
