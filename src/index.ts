@@ -3,9 +3,12 @@ import * as path from 'path';
 import * as AWS from 'aws-sdk';
 import Bottleneck from 'bottleneck';
 import * as delay from "delay";
-import {JsonWriter, CsvWriter } from './writer';
+import {JsonWriter, CsvWriter} from './writer';
+import {register} from "ts-node";
 
 const JSONStream = require('JSONStream');
+const csv = require('csv-parser');
+const {userAttributes} = require('./userAttributes');
 
 type CognitoISP = AWS.CognitoIdentityServiceProvider;
 type ListUsersRequestTypes = AWS.CognitoIdentityServiceProvider.Types.ListUsersRequest;
@@ -17,7 +20,7 @@ enum OutputFormat {
     CSV = 'csv'
 }
 
-export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string, delayDurationInMillis: number = 0, outputFormat: OutputFormat = OutputFormat.JSON ) => {
+export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string, delayDurationInMillis: number = 0, outputFormat: OutputFormat = OutputFormat.JSON) => {
     let userPoolList: string[] = [];
 
     if (UserPoolId == 'all') {
@@ -51,11 +54,12 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
 
                 if (PaginationToken) {
                     params.PaginationToken = PaginationToken;
-                    if(delayDurationInMillis > 0) {
+                    if (delayDurationInMillis > 0) {
                         await delay(delayDurationInMillis);
                     }
                     await paginationCalls();
-                };
+                }
+                ;
             };
 
             await paginationCalls();
@@ -81,56 +85,83 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
 
     const limiter = new Bottleneck({minTime: 2000});
     const readStream = fs.createReadStream(file);
-    const parser = JSONStream.parse();
+    const parser = file.endsWith('.json') ? JSONStream.parse() : csv();
+
+    const getUserAttributesFromCsv = function (userFromCsv: object): AttributeType[] {
+        const attributes: AttributeType[] = [];
+        userAttributes.forEach((Name: string) => {
+            if(userFromCsv[Name]) {
+                attributes.push({Name, Value: userFromCsv[Name]})
+            }
+        });
+        return attributes;
+    };
+
+    const getUserAttributesFromJson = function (userFromJson:any): AttributeType[] {
+        return userFromJson.Attributes.filter((attr: AttributeType) => attr.Name !== 'sub');
+    };
+
+    const registerUser = async function (user: any, userAttributeGetter:any) {
+        // filter out non-mutable attributes
+        const attributes = userAttributeGetter(user);
+
+        const params: AdminCreateUserRequest = {
+            UserPoolId,
+            Username: user.Username,
+            UserAttributes: attributes
+        };
+
+        // Set Username as email if UsernameAttributes of UserPool contains email
+        if (UsernameAttributes.includes('email')) {
+            params.Username = pluckValue(attributes, 'email') as string;
+            params.DesiredDeliveryMediums = ['EMAIL']
+        } else if (UsernameAttributes.includes('phone_number')) {
+            params.Username = pluckValue(attributes, 'phone_number') as string;
+            params.DesiredDeliveryMediums = ['EMAIL', 'SMS']
+        }
+
+        // If password module is specified, use it silently
+        // if not provided or it throws, we fallback to password if provided
+        // if password is provided, use it silently
+        // else set a cognito generated one and send email (default)
+        let specificPwdExistsForUser = false;
+        if (pwdModule !== null) {
+            try {
+                params.MessageAction = 'SUPPRESS';
+                params.TemporaryPassword = pwdModule.getPwdForUsername(user.Username);
+                specificPwdExistsForUser = true;
+            } catch (e) {
+                console.error(`"${e.message}" error occurred for user "${params.Username}" while getting password from ${passwordModulePath}. Falling back to default.`);
+            }
+        }
+        if (!specificPwdExistsForUser && password) {
+            params.MessageAction = 'SUPPRESS';
+            params.TemporaryPassword = password;
+        }
+        const wrapped = limiter.wrap(async () => cognito.adminCreateUser(params).promise());
+        try {
+            await wrapped();
+        } catch (e) {
+            if (e.code === 'UsernameExistsException') {
+                console.log(`Looks like user ${user.Username} already exists, ignoring.`)
+            }
+            if(e.name === 'InvalidParameterException' && e.message === 'User pool does not have SMS configuration to send messages.'){
+                // Eating exception because its bug on AWS side
+                // refer https://forums.aws.amazon.com/thread.jspa?threadID=248382 for more information
+                return;
+            }
+            else {
+                throw e;
+            }
+        }
+    }
 
     parser.on('data', async (data: any[]) => {
+        if(isCsvFile(file)) {
+            return await registerUser(data, getUserAttributesFromCsv)
+        }
         for (let user of data) {
-            // filter out non-mutable attributes
-            const attributes = user.Attributes.filter((attr: AttributeType) => attr.Name !== 'sub');
-
-            const params: AdminCreateUserRequest = {
-                UserPoolId,
-                Username: user.Username,
-                UserAttributes: attributes
-            };
-
-            // Set Username as email if UsernameAttributes of UserPool contains email
-            if (UsernameAttributes.includes('email')) {
-                params.Username = pluckValue(user.Attributes, 'email') as string;
-                params.DesiredDeliveryMediums = ['EMAIL']
-            } else if (UsernameAttributes.includes('phone_number')) {
-                params.Username = pluckValue(user.Attributes, 'phone_number') as string;
-                params.DesiredDeliveryMediums = ['EMAIL', 'SMS']
-            }
-
-            // If password module is specified, use it silently
-            // if not provided or it throws, we fallback to password if provided
-            // if password is provided, use it silently
-            // else set a cognito generated one and send email (default)
-            let specificPwdExistsForUser = false;
-            if (pwdModule !== null) {
-                try {
-                    params.MessageAction = 'SUPPRESS';
-                    params.TemporaryPassword = pwdModule.getPwdForUsername(user.Username);
-                    specificPwdExistsForUser = true;
-                } catch (e) {
-                    console.error(`"${e.message}" error occurred for user "${params.Username}" while getting password from ${passwordModulePath}. Falling back to default.`);
-                }
-            }
-            if (!specificPwdExistsForUser && password) {
-                params.MessageAction = 'SUPPRESS';
-                params.TemporaryPassword = password;
-            }
-            const wrapped = limiter.wrap(async () => cognito.adminCreateUser(params).promise());
-            try {
-                await wrapped();
-            } catch (e) {
-                if (e.code === 'UsernameExistsException') {
-                    console.log(`Looks like user ${user.Username} already exists, ignoring.`)
-                } else {
-                    throw e;
-                }
-            }
+            await registerUser(user, getUserAttributesFromJson)
         }
     });
 
@@ -144,3 +175,5 @@ const pluckValue = (arr: AttributeType[], key: string) => {
 
     return object.Value;
 };
+
+const isCsvFile = (file: string) => file.endsWith('.csv');
