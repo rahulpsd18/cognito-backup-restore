@@ -110,9 +110,20 @@ cbr <command> [options]
 Thanks goes to these wonderful people ([emoji key](https://github.com/all-contributors/all-contributors#emoji-key)):
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore -->
-| [<img src="https://avatars1.githubusercontent.com/u/30614870?v=4" width="100px;" alt="adityamedhe-cc"/><br /><sub><b>adityamedhe-cc</b></sub>](https://github.com/adityamedhe-cc)<br />[📖](https://github.com/rahulpsd18/cognito-backup-restore/commits?author=adityamedhe-cc "Documentation") [💻](https://github.com/rahulpsd18/cognito-backup-restore/commits?author=adityamedhe-cc "Code") | [<img src="https://avatars1.githubusercontent.com/u/18159739?v=4" width="100px;" alt="juno-visualsquares"/><br /><sub><b>juno-visualsquares</b></sub>](https://github.com/juno-visualsquares)<br />[💻](https://github.com/rahulpsd18/cognito-backup-restore/commits?author=juno-visualsquares "Code") [🤔](#ideas-juno-visualsquares "Ideas, Planning, & Feedback") | [<img src="https://avatars2.githubusercontent.com/u/1521394?v=4" width="100px;" alt="Charlie Brown"/><br /><sub><b>Charlie Brown</b></sub>](http://www.carbonatethis.com)<br />[🐛](https://github.com/rahulpsd18/cognito-backup-restore/issues?q=author%3Acarbonrobot "Bug reports") | [<img src="https://avatars3.githubusercontent.com/u/32401961?v=4" width="100px;" alt="Alvaro Del Valle"/><br /><sub><b>Alvaro Del Valle</b></sub>](http://gardlabs.com)<br />[💬](#question-alvarodelvalle "Answering Questions") |
-| :---: | :---: | :---: | :---: |
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/adityamedhe-cc"><img src="https://avatars1.githubusercontent.com/u/30614870?v=4" width="100px;" alt=""/><br /><sub><b>adityamedhe-cc</b></sub></a><br /><a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=adityamedhe-cc" title="Documentation">📖</a> <a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=adityamedhe-cc" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/juno-visualsquares"><img src="https://avatars1.githubusercontent.com/u/18159739?v=4" width="100px;" alt=""/><br /><sub><b>juno-visualsquares</b></sub></a><br /><a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=juno-visualsquares" title="Code">💻</a> <a href="#ideas-juno-visualsquares" title="Ideas, Planning, & Feedback">🤔</a></td>
+    <td align="center"><a href="http://www.carbonatethis.com"><img src="https://avatars2.githubusercontent.com/u/1521394?v=4" width="100px;" alt=""/><br /><sub><b>Charlie Brown</b></sub></a><br /><a href="https://github.com/rahulpsd18/cognito-backup-restore/issues?q=author%3Acarbonrobot" title="Bug reports">🐛</a></td>
+    <td align="center"><a href="http://gardlabs.com"><img src="https://avatars3.githubusercontent.com/u/32401961?v=4" width="100px;" alt=""/><br /><sub><b>Alvaro Del Valle</b></sub></a><br /><a href="#question-alvarodelvalle" title="Answering Questions">💬</a></td>
+    <td align="center"><a href="http://blog.v-lad.org"><img src="https://avatars2.githubusercontent.com/u/36257?v=4" width="100px;" alt=""/><br /><sub><b>Vlad Korolev</b></sub></a><br /><a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=vladistan" title="Code">💻</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-enable -->
+<!-- prettier-ignore-end -->
 <!-- ALL-CONTRIBUTORS-LIST:END -->
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
