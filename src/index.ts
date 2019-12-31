@@ -4,18 +4,16 @@ import * as AWS from 'aws-sdk';
 import Bottleneck from 'bottleneck';
 import * as delay from "delay";
 import {JsonWriter, CsvWriter} from './writer';
-import {register} from "ts-node";
 
 const JSONStream = require('JSONStream');
 const csv = require('csv-parser');
-const {userAttributes} = require('./userAttributes');
 
 type CognitoISP = AWS.CognitoIdentityServiceProvider;
 type ListUsersRequestTypes = AWS.CognitoIdentityServiceProvider.Types.ListUsersRequest;
 type AdminCreateUserRequest = AWS.CognitoIdentityServiceProvider.Types.AdminCreateUserRequest;
 type AttributeType = AWS.CognitoIdentityServiceProvider.Types.AttributeType;
 
-enum OutputFormat {
+export enum OutputFormat {
     JSON = 'json',
     CSV = 'csv'
 }
@@ -89,19 +87,22 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
 
     const getUserAttributesFromCsv = function (userFromCsv: object): AttributeType[] {
         const attributes: AttributeType[] = [];
-        userAttributes.forEach((Name: string) => {
-            if(userFromCsv[Name]) {
-                attributes.push({Name, Value: userFromCsv[Name]})
-            }
-        });
+        const nonUserAttributes: string[] = ["Username", "UserCreateDate", "UserLastModifiedDate", "Enabled", "UserStatus"];
+        Object.keys(userFromCsv)
+            .filter((key: string) => !nonUserAttributes.includes(key))
+            .forEach((Name: string) => {
+                if (userFromCsv[Name]) {
+                    attributes.push({Name, Value: userFromCsv[Name]})
+                }
+            });
         return attributes;
     };
 
-    const getUserAttributesFromJson = function (userFromJson:any): AttributeType[] {
+    const getUserAttributesFromJson = function (userFromJson: any): AttributeType[] {
         return userFromJson.Attributes.filter((attr: AttributeType) => attr.Name !== 'sub');
     };
 
-    const registerUser = async function (user: any, userAttributeGetter:any) {
+    const registerUser = async function (user: any, userAttributeGetter: any) {
         // filter out non-mutable attributes
         const attributes = userAttributeGetter(user);
 
@@ -145,19 +146,18 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
             if (e.code === 'UsernameExistsException') {
                 console.log(`Looks like user ${user.Username} already exists, ignoring.`)
             }
-            if(e.name === 'InvalidParameterException' && e.message === 'User pool does not have SMS configuration to send messages.'){
+            if (e.name === 'InvalidParameterException' && e.message === 'User pool does not have SMS configuration to send messages.') {
                 // Eating exception because its bug on AWS side
                 // refer https://forums.aws.amazon.com/thread.jspa?threadID=248382 for more information
                 return;
-            }
-            else {
+            } else {
                 throw e;
             }
         }
     }
 
     parser.on('data', async (data: any[]) => {
-        if(isCsvFile(file)) {
+        if (isCsvFile(file)) {
             await registerUser(data, getUserAttributesFromCsv)
         }
         for (let user of data) {

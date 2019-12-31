@@ -3,7 +3,7 @@ import * as fuzzy from 'fuzzy';
 import * as inquirer from 'inquirer';
 import chalk from 'chalk';
 import { argv } from './args';
-import {OutputFormat} from "../../build/OutputFormat";
+import {OutputFormat} from "../index";
 
 inquirer.registerPrompt('directory', require('inquirer-select-directory'));
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
