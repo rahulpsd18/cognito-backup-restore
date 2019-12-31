@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as AWS from 'aws-sdk';
 import Bottleneck from 'bottleneck';
 import * as delay from "delay";
-import {JsonWriter, CsvWriter} from './writer';
+import {JsonWriter, CsvWriter, Writer} from './writer';
 
 const JSONStream = require('JSONStream');
 const csv = require('csv-parser');
@@ -30,16 +30,19 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
     }
 
     for (let poolId of userPoolList) {
-
         // create directory if not exists
-        !fs.existsSync(directory) && fs.mkdirSync(directory)
+        !fs.existsSync(directory) && fs.mkdirSync(directory);
 
         const fileExtension = outputFormat === OutputFormat.JSON ? '.json' : '.csv';
         const file = path.join(directory, `${poolId}${fileExtension}`);
         const writeStream = fs.createWriteStream(file);
-        const writer = outputFormat === OutputFormat.JSON ? new JsonWriter(writeStream) : new CsvWriter(writeStream);
-
-        // writer.pipe(writeStream);
+        let writer:Writer;
+        if(outputFormat === OutputFormat.JSON) {
+            writer = new JsonWriter(writeStream)
+        } else {
+            const userAttributes = await getUserAttributesFromPool(poolId, cognito);
+            writer = new CsvWriter(writeStream, userAttributes);
+        }
 
         const params: ListUsersRequestTypes = {
             UserPoolId: poolId
@@ -57,7 +60,6 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
                     }
                     await paginationCalls();
                 }
-                ;
             };
 
             await paginationCalls();
@@ -71,7 +73,7 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
 };
 
 
-export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string, passwordModulePath?: String, delayDurationInMillis: number = 0) => {
+export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string, passwordModulePath?: String) => {
     if (UserPoolId == 'all') throw Error(`'all' is not a acceptable value for UserPoolId`);
     let pwdModule: any = null;
     if (typeof passwordModulePath === 'string') {
@@ -154,7 +156,7 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
                 throw e;
             }
         }
-    }
+    };
 
     parser.on('data', async (data: any[]) => {
         if (isCsvFile(file)) {
@@ -171,9 +173,17 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
 const pluckValue = (arr: AttributeType[], key: string) => {
     const object = arr.find((attr: AttributeType) => attr.Name == key);
 
-    if (!object) throw Error(`${key} not found in the user attribute`)
+    if (!object) throw Error(`${key} not found in the user attribute`);
 
     return object.Value;
 };
 
 const isCsvFile = (file: string) => file.endsWith('.csv');
+
+const getUserAttributesFromPool = async function (userPoolId: string, cognito: CognitoISP): Promise<string[]> {
+    const {UserPool} = await cognito.describeUserPool({UserPoolId: userPoolId}).promise();
+
+    // @ts-ignore
+    return UserPool.SchemaAttributes.map((attribute: any) => attribute.Name)
+        .filter((attributeName: any) => attributeName !== 'sub');
+};

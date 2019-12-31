@@ -21,32 +21,19 @@ interface Attribute {
     Value: any
 }
 
-const fields = [
-    "Username",
-    "UserCreateDate",
-    "UserLastModifiedDate",
-    "Enabled",
-    "UserStatus",
-    getFieldExtractorForAttribute("phone_number"),
-    getFieldExtractorForAttribute("email"),
-    getFieldExtractorForAttribute("name"),
-    getFieldExtractorForAttribute("middle_name"),
-    getFieldExtractorForAttribute("given_name"),
-    getFieldExtractorForAttribute("family_name"),
-    getFieldExtractorForAttribute("nickname"),
-    getFieldExtractorForAttribute("address"),
-    getFieldExtractorForAttribute("birthdate"),
-    getFieldExtractorForAttribute("gender"),
-    getFieldExtractorForAttribute("locale"),
-    getFieldExtractorForAttribute("picture"),
-    getFieldExtractorForAttribute("preferred_username"),
-    getFieldExtractorForAttribute("profile"),
-    getFieldExtractorForAttribute("timezone"),
-    getFieldExtractorForAttribute("updated_at"),
-    getFieldExtractorForAttribute("website")
-];
+const getHeaderFieldForCsvFile = function (userAttributes:string[]):any[] {
+    const fixedFields:any[] = [
+        "Username",
+        "UserCreateDate",
+        "UserLastModifiedDate",
+        "Enabled",
+        "UserStatus"
+    ];
+    const userAttributeFields:any[] = userAttributes.map(getFieldExtractorForAttribute);
+    return fixedFields.concat(userAttributeFields);
+}
 
-abstract class Writer {
+export abstract class Writer {
     readonly encoder: any;
     readonly writeStream: any;
 
@@ -68,8 +55,8 @@ abstract class Writer {
 }
 
 export class CsvWriter extends Writer {
-    constructor(writeStream:any) {
-        const encoder = new Transform({fields});
+    constructor(writeStream:any, userAttributes:string[]) {
+        const encoder = new Transform({fields: getHeaderFieldForCsvFile(userAttributes)});
         super(writeStream, encoder);
     }
 
