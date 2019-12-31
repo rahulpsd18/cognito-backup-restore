@@ -25,9 +25,9 @@ export const argv = yargs
                 string: true
             }
         })
-            .option('outputFormat', {
+            .option('fileFormat', {
                 alias: ['o'],
-                describe: dimmed`Format in which backup file has to writen. Support format: json, csv`,
+                describe: dimmed`Format of the backup file. Supported format: json, csv`,
                 string: true
             });
     })
