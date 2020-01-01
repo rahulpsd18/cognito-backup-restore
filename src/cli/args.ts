@@ -41,7 +41,7 @@ export const argv = yargs
             },
             file: {
                 alias: ['f'],
-                describe: dimmed`JSON file to import data from`,
+                describe: dimmed`file to import data from. Supported formats json and csv`,
                 string: true
             },
             password: {

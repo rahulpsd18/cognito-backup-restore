@@ -13,12 +13,12 @@ type ListUsersRequestTypes = AWS.CognitoIdentityServiceProvider.Types.ListUsersR
 type AdminCreateUserRequest = AWS.CognitoIdentityServiceProvider.Types.AdminCreateUserRequest;
 type AttributeType = AWS.CognitoIdentityServiceProvider.Types.AttributeType;
 
-export enum OutputFormat {
+export enum FileFormat {
     JSON = 'json',
     CSV = 'csv'
 }
 
-export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string, delayDurationInMillis: number = 0, outputFormat: OutputFormat = OutputFormat.JSON) => {
+export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string, delayDurationInMillis: number = 0, fileFormat: FileFormat = FileFormat.JSON) => {
     let userPoolList: string[] = [];
 
     if (UserPoolId == 'all') {
@@ -33,11 +33,11 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
         // create directory if not exists
         !fs.existsSync(directory) && fs.mkdirSync(directory);
 
-        const fileExtension = outputFormat === OutputFormat.JSON ? '.json' : '.csv';
+        const fileExtension = fileFormat === FileFormat.JSON ? '.json' : '.csv';
         const file = path.join(directory, `${poolId}${fileExtension}`);
         const writeStream = fs.createWriteStream(file);
         let writer:Writer;
-        if(outputFormat === OutputFormat.JSON) {
+        if(fileFormat === FileFormat.JSON) {
             writer = new JsonWriter(writeStream)
         } else {
             const userAttributes = await getUserAttributesFromPool(poolId, cognito);
@@ -75,6 +75,7 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
 
 export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string, passwordModulePath?: String) => {
     if (UserPoolId == 'all') throw Error(`'all' is not a acceptable value for UserPoolId`);
+    if (!isCsvFile(file) && !isJsonFile(file)) throw Error('Unsupported file format. Only json and csv format are supported');
     let pwdModule: any = null;
     if (typeof passwordModulePath === 'string') {
         pwdModule = require(passwordModulePath);
@@ -161,9 +162,10 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
     parser.on('data', async (data: any[]) => {
         if (isCsvFile(file)) {
             await registerUser(data, getUserAttributesFromCsv)
-        }
-        for (let user of data) {
-            await registerUser(user, getUserAttributesFromJson)
+        } else {
+            for (let user of data) {
+                await registerUser(user, getUserAttributesFromJson)
+            }
         }
     });
 
@@ -179,6 +181,7 @@ const pluckValue = (arr: AttributeType[], key: string) => {
 };
 
 const isCsvFile = (file: string) => file.endsWith('.csv');
+const isJsonFile = (file: string) => file.endsWith('.json');
 
 const getUserAttributesFromPool = async function (userPoolId: string, cognito: CognitoISP): Promise<string[]> {
     const {UserPool} = await cognito.describeUserPool({UserPoolId: userPoolId}).promise();

@@ -3,7 +3,7 @@ import * as fuzzy from 'fuzzy';
 import * as inquirer from 'inquirer';
 import chalk from 'chalk';
 import { argv } from './args';
-import {OutputFormat} from "../index";
+import {FileFormat} from "../index";
 
 inquirer.registerPrompt('directory', require('inquirer-select-directory'));
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'));
@@ -43,7 +43,7 @@ const searchCognitoRegion = async (_: never, input: string) => {
 };
 
 const verifyOptions = async () => {
-    let { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, outputFormat } = argv;
+    let { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, fileFormat } = argv;
 
     // choose the mode if not passed through CLI or invalid is passed
     if (!mode || !['restore', 'backup'].includes(mode)) {
@@ -160,7 +160,7 @@ const verifyOptions = async () => {
         }
     }
 
-    if (isBackup(mode) && !outputFormat) {
+    if (isBackup(mode) && !fileFormat) {
         const modeChoice = await inquirer.prompt<{ selected: string }>({
             type: 'list',
             name: 'selected',
@@ -169,14 +169,14 @@ const verifyOptions = async () => {
             default: 'json'
         });
 
-        outputFormat = modeChoice.selected;
+        fileFormat = modeChoice.selected;
     }
 
-    if (outputFormat && outputFormat !== OutputFormat.JSON && outputFormat !== OutputFormat.CSV) {
-        throw Error(`Unsupported output format ${outputFormat}. Only json and csv format are supported`)
+    if (fileFormat && fileFormat !== FileFormat.JSON && fileFormat !== FileFormat.CSV) {
+        throw Error(`Unsupported file format ${fileFormat}. Only json and csv format are supported`)
     }
     
-    return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, outputFormat }
+    return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, fileFormat }
 };
 
 const isBackup = (mode:string):boolean => mode === 'backup';
