@@ -37,11 +37,11 @@ import {backupUsers, restoreUsers} from 'cognito-backup-restore';
 const cognitoISP = new AWS.CognitoIdentityServiceProvider();
 
 // you may use async-await too
-backupUsers(cognitoISP, <USERPOOL-ID>, <directory>)
+backupUsers(cognitoISP, <USERPOOL-ID>, <directory>, <delayDurationInMillis>, <fileFormat>) //fileFormat: json, csv
   .then(() => console.log(`Backup completed`))
   .catch(console.error)
 
-restoreUsers(cognitoISP, <USERPOOL-ID>, <JSON-File>, <Password?>)
+restoreUsers(cognitoISP, <USERPOOL-ID>, <File>, <Password?>) // File can json or csv
   .then(() => console.log(`Restore completed`))
   .catch(console.error)
 ```
@@ -69,6 +69,8 @@ cbr <command> [options]
 > `--aws-secret-key` `--secret`: The AWS Secret Key to use. Not to be passed when using `--profile`.
 >
 > `--delay`: delay in millis between alternate users batch(60) backup, to avoid rate limit error.
+>
+> `--fileFormat`: Format of backup file. Supported formats are json and csv
 
 ![Image showing CLI Usage](gifs/demo.png "CLI Usage")
 
@@ -101,7 +103,7 @@ cbr <command> [options]
 - [X] ~~Fine tune the backup process~~
 - [X] ~~Implement Restore~~
 - [X] ~~Write detailed Readme with examples~~
-- [ ] Convert JSON to CSV
+- [X] ~~Convert JSON to CSV~~
 - [ ] Implement Amazon Cognito User Pool Import Job
 - [ ] AWS Cross-Region Cognito Replication
 
