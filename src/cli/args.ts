@@ -62,7 +62,7 @@ export const argv = yargs
     .option('profile', {
         alias: ['p'],
         describe: dimmed`Use a specific profile from your credential file`,
-        conflicts: ['aws-access-key', 'aws-secret-key'],
+        conflicts: ['aws-access-key', 'aws-secret-key', 'env-credentials'],
         string: true,
     })
     .option('region', {
@@ -73,13 +73,13 @@ export const argv = yargs
     .option('aws-access-key', {
         alias: ['key', 'k'],
         describe: dimmed`The AWS Access Key to use. Overrides config/env settings`,
-        conflicts: ['profile'],
+        conflicts: ['profile', 'env-credentials'],
         string: true,
     })
     .option('aws-secret-key', {
         alias: ['secret', 's'],
         describe: dimmed`The AWS Secret Key to use. Overrides config/env settings`,
-        conflicts: ['profile'],
+        conflicts: ['profile', 'env-credentials'],
         string: true
     })
     .option('userpool', {
@@ -90,6 +90,12 @@ export const argv = yargs
     .option('delay', {
         describe: dimmed`delay in millis between alternate users batch(60) backup, to avoid rate limit error`,
         number: true
+    })
+    .option('env-credentials', {
+        alias: ['env', 'e'],
+        describe: dimmed`Credentials are defined in environment variables`,
+        conflicts: ['profile', 'aws-secret-key', 'aws-access-key'],
+        type: 'boolean'
     })
 
     // help
