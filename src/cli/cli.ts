@@ -25,11 +25,11 @@ const orange = chalk.keyword('orange');
             AWS.config.credentials = new AWS.Credentials({
                 accessKeyId: key, secretAccessKey: secret
             });
-        } else if (metadata) {
-            AWS.config.credentials = new AWS.EC2MetadataCredentials({});
         } else if (env) {
             AWS.config.credentials = new AWS.EnvironmentCredentials('AWS');
-        }
+        } else if (metadata) {
+            AWS.config.credentials = new AWS.EC2MetadataCredentials({});
+        } 
 
         const cognitoISP = new AWS.CognitoIdentityServiceProvider();
 

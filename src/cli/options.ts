@@ -9,16 +9,6 @@ inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 inquirer.registerPrompt('filePath', require('inquirer-file-path'));
 
 const greenify = chalk.green;
-const credentials = new AWS.IniLoader().loadFrom({});
-const savedAWSProfiles = Object.keys(credentials);
-
-const searchAWSProfile = async (_: never, input: string) => {
-    input = input || '';
-    const fuzzyResult = fuzzy.filter(input, savedAWSProfiles);
-    return fuzzyResult.map(el => {
-        return el.original;
-    });
-};
 
 const searchCognitoRegion = async (_: never, input: string) => {
     input = input || '';
@@ -56,19 +46,30 @@ const verifyOptions = async () => {
         mode = modeChoice.selected.toLowerCase();
     }
 
-    // choose your profile from available AWS profiles if not passed through CLI
-    // only shown in case when no valid profile or no key && secret is passed.
-    if (!savedAWSProfiles.includes(profile) && (!key || !secret) && !metadata && !env) {
-        const awsProfileChoice = await inquirer.prompt({
-            type: 'autocomplete',
-            name: 'selected',
-            message: 'Choose your AWS Profile',
-            source: searchAWSProfile,
-        } as inquirer.Question);
+    if (!metadata && !env) {
+        const credentials = new AWS.IniLoader().loadFrom({});
+        const savedAWSProfiles = Object.keys(credentials);
 
-        profile = awsProfileChoice.selected;
-    };
+        const searchAWSProfile = async (_: never, input: string) => {
+            input = input || '';
+            const fuzzyResult = fuzzy.filter(input, savedAWSProfiles);
+            return fuzzyResult.map(el => {
+                return el.original;
+            });
+        };
+        // choose your profile from available AWS profiles if not passed through CLI
+        // only shown in case when no valid profile or no key && secret is passed.
+        if (!savedAWSProfiles.includes(profile) && (!key || !secret)) {
+            const awsProfileChoice = await inquirer.prompt({
+                type: 'autocomplete',
+                name: 'selected',
+                message: 'Choose your AWS Profile',
+                source: searchAWSProfile,
+            } as inquirer.Question);
 
+            profile = awsProfileChoice.selected;
+        };
+    }
     // choose your region if not passed through CLI
     if (!region) {
         const awsRegionChoice = await inquirer.prompt({
@@ -91,7 +92,11 @@ const verifyOptions = async () => {
             AWS.config.credentials = new AWS.Credentials({
                 accessKeyId: key, secretAccessKey: secret
             });
-        }
+        } else if (env) {
+            AWS.config.credentials = new AWS.EnvironmentCredentials('AWS');
+        } else if (metadata) {
+            AWS.config.credentials = new AWS.EC2MetadataCredentials({});
+        } 
 
         const cognitoISP = new AWS.CognitoIdentityServiceProvider();
         const { UserPools } = await cognitoISP.listUserPools({ MaxResults: 60 }).promise();
