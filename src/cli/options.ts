@@ -42,7 +42,7 @@ const searchCognitoRegion = async (_: never, input: string) => {
 };
 
 const verifyOptions = async () => {
-    let { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, env } = argv;
+    let { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, metadata, env } = argv;
 
     // choose the mode if not passed through CLI or invalid is passed
     if (!mode || !['restore', 'backup'].includes(mode)) {
@@ -58,7 +58,7 @@ const verifyOptions = async () => {
 
     // choose your profile from available AWS profiles if not passed through CLI
     // only shown in case when no valid profile or no key && secret is passed.
-    if (!savedAWSProfiles.includes(profile) && (!key || !secret) && !env) {
+    if (!savedAWSProfiles.includes(profile) && (!key || !secret) && !metadata && !env) {
         const awsProfileChoice = await inquirer.prompt({
             type: 'autocomplete',
             name: 'selected',
@@ -158,7 +158,7 @@ const verifyOptions = async () => {
             throw Error(`Cannot load password module path "${passwordModulePath}".`);
         }
     }
-    return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay }
+    return { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, metadata, env }
 };
 
 

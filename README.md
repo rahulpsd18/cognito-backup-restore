@@ -69,6 +69,10 @@ cbr <command> [options]
 > `--aws-secret-key` `--secret`: The AWS Secret Key to use. Not to be passed when using `--profile`.
 >
 > `--delay`: delay in millis between alternate users batch(60) backup, to avoid rate limit error.
+>
+> `--use-env-vars`: Use AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_SESSION_TOKEN (optional) as environment variables
+>
+> `--use-ec2-metadata`: Use credentials received from the metadata service on an EC2 instance
 
 ![Image showing CLI Usage](gifs/demo.png "CLI Usage")
 

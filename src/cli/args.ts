@@ -62,7 +62,7 @@ export const argv = yargs
     .option('profile', {
         alias: ['p'],
         describe: dimmed`Use a specific profile from your credential file`,
-        conflicts: ['aws-access-key', 'aws-secret-key', 'env-credentials'],
+        conflicts: ['aws-access-key', 'aws-secret-key', 'use-ec2-metadata', 'use-env-vars'],
         string: true,
     })
     .option('region', {
@@ -73,13 +73,13 @@ export const argv = yargs
     .option('aws-access-key', {
         alias: ['key', 'k'],
         describe: dimmed`The AWS Access Key to use. Overrides config/env settings`,
-        conflicts: ['profile', 'env-credentials'],
+        conflicts: ['profile', 'use-ec2-metadata', 'use-env-vars'],
         string: true,
     })
     .option('aws-secret-key', {
         alias: ['secret', 's'],
         describe: dimmed`The AWS Secret Key to use. Overrides config/env settings`,
-        conflicts: ['profile', 'env-credentials'],
+        conflicts: ['profile', 'use-ec2-metadata', 'use-env-vars'],
         string: true
     })
     .option('userpool', {
@@ -91,10 +91,16 @@ export const argv = yargs
         describe: dimmed`delay in millis between alternate users batch(60) backup, to avoid rate limit error`,
         number: true
     })
-    .option('env-credentials', {
-        alias: ['env', 'e'],
-        describe: dimmed`Credentials are defined in environment variables`,
-        conflicts: ['profile', 'aws-secret-key', 'aws-access-key'],
+    .option('use-ec2-metadata', {
+        alias: ['metadata'],
+        describe: dimmed`Use iam role in ec2 instance.`,
+        conflicts: ['profile', 'aws-secret-key', 'aws-access-key', 'use-env-vars'],
+        type: 'boolean'
+    })
+    .option('use-env-vars', {
+        alias: ['env'],
+        describe: dimmed`Use credentials from environment variables.`,
+        conflicts: ['profile', 'aws-secret-key', 'aws-access-key', 'use-ec2-metadata'],
         type: 'boolean'
     })
 
