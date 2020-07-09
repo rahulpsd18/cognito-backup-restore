@@ -1,5 +1,5 @@
 # cognito-backup-restore
-[![All Contributors](https://img.shields.io/badge/all_contributors-4-orange.svg?style=flat-square)](#contributors)
+[![All Contributors](https://img.shields.io/badge/all_contributors-9-orange.svg?style=flat-square)](#contributors)
 
 AIO Tool for backing up and restoring AWS Cognito User Pools
 
