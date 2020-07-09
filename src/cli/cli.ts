@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 import * as AWS from 'aws-sdk';
 import * as ora from 'ora';
 
