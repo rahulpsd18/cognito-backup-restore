@@ -59,15 +59,15 @@ export const argv = yargs
     .example('$0 restore -p <PROFILE> [OPTIONS]', greyed`Restore using the options provided`)
 
     // options
+    .option('region', {
+        alias: ['r'],
+        describe: dimmed`The region to use. Overrides config/env settings`,
+        string: true,
+    })
     .option('profile', {
         alias: ['p'],
         describe: dimmed`Use a specific profile from your credential file`,
         conflicts: ['aws-access-key', 'aws-secret-key'],
-        string: true,
-    })
-    .option('region', {
-        alias: ['r'],
-        describe: dimmed`The region to use. Overrides config/env settings`,
         string: true,
     })
     .option('aws-access-key', {
@@ -82,15 +82,6 @@ export const argv = yargs
         conflicts: ['profile'],
         string: true
     })
-    .option('userpool', {
-        alias: ['pool'],
-        describe: dimmed`The Cognito pool to use. 'all' to backup all userpools.`,
-        string: true
-    })
-    .option('delay', {
-        describe: dimmed`delay in millis between alternate users batch(60) backup, to avoid rate limit error`,
-        number: true
-    })
     .option('use-ec2-metadata', {
         alias: ['metadata'],
         describe: dimmed`Use iam role in ec2 instance.`,
@@ -100,6 +91,15 @@ export const argv = yargs
         alias: ['env'],
         describe: dimmed`Use credentials from environment variables.`,
         type: 'boolean'
+    })
+    .option('userpool', {
+        alias: ['pool'],
+        describe: dimmed`The Cognito pool to use. 'all' to backup all userpools.`,
+        string: true
+    })
+    .option('delay', {
+        describe: dimmed`delay in millis between alternate users batch(60) backup, to avoid rate limit error`,
+        number: true
     })
 
     // help

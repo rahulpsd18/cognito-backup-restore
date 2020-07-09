@@ -47,8 +47,15 @@ const verifyOptions = async () => {
     }
 
     if (!metadata && !env) {
-        const credentials = new AWS.IniLoader().loadFrom({});
-        const savedAWSProfiles = Object.keys(credentials);
+
+        let savedAWSProfiles: string[] = [];
+
+        try { // to read from saved config
+            const credentials = new AWS.IniLoader().loadFrom({});
+            savedAWSProfiles = Object.keys(credentials);
+        } catch (err) {
+            // couldn't find saved config
+        }
 
         const searchAWSProfile = async (_: never, input: string) => {
             input = input || '';
@@ -57,9 +64,10 @@ const verifyOptions = async () => {
                 return el.original;
             });
         };
+
         // choose your profile from available AWS profiles if not passed through CLI
         // only shown in case when no valid profile or no key && secret is passed.
-        if (!savedAWSProfiles.includes(profile) && (!key || !secret)) {
+        if (savedAWSProfiles.length && !savedAWSProfiles.includes(profile) && (!key || !secret)) {
             const awsProfileChoice = await inquirer.prompt({
                 type: 'autocomplete',
                 name: 'selected',
@@ -96,7 +104,9 @@ const verifyOptions = async () => {
             AWS.config.credentials = new AWS.EnvironmentCredentials('AWS');
         } else if (metadata) {
             AWS.config.credentials = new AWS.EC2MetadataCredentials({});
-        } 
+        } else {
+            throw Error('No credential found. Try using --help to read about various configurations supported.')
+        }
 
         const cognitoISP = new AWS.CognitoIdentityServiceProvider();
         const { UserPools } = await cognitoISP.listUserPools({ MaxResults: 60 }).promise();
@@ -159,7 +169,7 @@ const verifyOptions = async () => {
             if (typeof pwdModule.getPwdForUsername !== 'function') {
                 throw Error(`Cannot find getPwdForUsername(username: String) in password module "${passwordModulePath}".`);
             };
-        } catch(e) {
+        } catch (e) {
             throw Error(`Cannot load password module path "${passwordModulePath}".`);
         }
     }
