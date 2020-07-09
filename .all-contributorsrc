@@ -74,6 +74,16 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "steveizzle",
+      "name": "steveizzle",
+      "avatar_url": "https://avatars2.githubusercontent.com/u/45331237?v=4",
+      "profile": "https://github.com/steveizzle",
+      "contributions": [
+        "doc",
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
