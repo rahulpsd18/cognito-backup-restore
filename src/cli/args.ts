@@ -91,6 +91,16 @@ export const argv = yargs
         describe: dimmed`delay in millis between alternate users batch(60) backup, to avoid rate limit error`,
         number: true
     })
+    .option('use-ec2-metadata', {
+        alias: ['metadata'],
+        describe: dimmed`Use iam role in ec2 instance.`,
+        type: 'boolean'
+    })
+    .option('use-env-vars', {
+        alias: ['env'],
+        describe: dimmed`Use credentials from environment variables.`,
+        type: 'boolean'
+    })
 
     // help
     .help('help', dimmed`Show help`)

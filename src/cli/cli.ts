@@ -14,7 +14,7 @@ const orange = chalk.keyword('orange');
 (async () => {
     let spinner = ora({ spinner: 'dots4', hideCursor: true });
     try {
-        const { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay } = await options;
+        const { mode, profile, region, key, secret, userpool, directory, file, password, passwordModulePath, delay, metadata, env} = await options;
 
         // update the config of aws-sdk based on profile/credentials passed
         AWS.config.update({ region });
@@ -25,7 +25,11 @@ const orange = chalk.keyword('orange');
             AWS.config.credentials = new AWS.Credentials({
                 accessKeyId: key, secretAccessKey: secret
             });
-        }
+        } else if (env) {
+            AWS.config.credentials = new AWS.EnvironmentCredentials('AWS');
+        } else if (metadata) {
+            AWS.config.credentials = new AWS.EC2MetadataCredentials({});
+        } 
 
         const cognitoISP = new AWS.CognitoIdentityServiceProvider();
 
