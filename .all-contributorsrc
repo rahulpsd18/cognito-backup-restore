@@ -84,6 +84,15 @@
         "doc",
         "code"
       ]
+    },
+    {
+      "login": "mholger",
+      "name": "M. Holger",
+      "avatar_url": "https://avatars3.githubusercontent.com/u/71354?v=4",
+      "profile": "https://www.paralleltheory.com/",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "contributorsPerLine": 7,
