@@ -43,8 +43,10 @@ const orange = chalk.keyword('orange');
             spinner.succeed(green(`Users imported successfully to ${userpool}\n`));
         } else {
             spinner.fail(red`Mode passed is invalid, please make sure a valid command is passed here.\n`);
+            process.exit(1);
         }
     } catch (error) {
         spinner.fail(red(error.message));
+        process.exit(1);
     }
 })();
