@@ -46,5 +46,6 @@ const orange = chalk.keyword('orange');
         }
     } catch (error) {
         spinner.fail(red(error.message));
+        process.exit(1);
     }
 })();
