@@ -125,7 +125,10 @@ Thanks goes to these wonderful people ([emoji key](https://github.com/all-contri
     <td align="center"><a href="http://blog.v-lad.org"><img src="https://avatars2.githubusercontent.com/u/36257?v=4" width="100px;" alt=""/><br /><sub><b>Vlad Korolev</b></sub></a><br /><a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=vladistan" title="Code">💻</a></td>
     <td align="center"><a href="https://github.com/ashishkujoy"><img src="https://avatars2.githubusercontent.com/u/34642693?v=4" width="100px;" alt=""/><br /><sub><b>ashish kumar </b></sub></a><br /><a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=ashishkujoy" title="Documentation">📖</a> <a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=ashishkujoy" title="Code">💻</a></td>
     <td align="center"><a href="https://qiita.com/ufoo68"><img src="https://avatars1.githubusercontent.com/u/24458640?v=4" width="100px;" alt=""/><br /><sub><b>ufoo68</b></sub></a><br /><a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=ufoo68" title="Code">💻</a></td>
+  </tr>
+  <tr>
     <td align="center"><a href="https://github.com/steveizzle"><img src="https://avatars2.githubusercontent.com/u/45331237?v=4" width="100px;" alt=""/><br /><sub><b>steveizzle</b></sub></a><br /><a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=steveizzle" title="Documentation">📖</a> <a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=steveizzle" title="Code">💻</a></td>
+    <td align="center"><a href="https://www.paralleltheory.com/"><img src="https://avatars3.githubusercontent.com/u/71354?v=4" width="100px;" alt=""/><br /><sub><b>M. Holger</b></sub></a><br /><a href="https://github.com/rahulpsd18/cognito-backup-restore/commits?author=mholger" title="Code">💻</a></td>
   </tr>
 </table>
 
