@@ -57,7 +57,7 @@
     "inquirer-autocomplete-prompt": "^0.12.2",
     "inquirer-file-path": "^1.0.1",
     "inquirer-select-directory": "^1.2.0",
-    "ora": "^2.1.0",
+    "ora": "^5.2.0",
     "yargs": "^11.0.0"
   }
 }
