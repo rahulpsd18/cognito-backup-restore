@@ -39,7 +39,7 @@ const orange = chalk.keyword('orange');
             spinner.succeed(green(`JSON Exported successfully to ${directory}/\n`));
         } else if (mode === 'restore') {
             spinner = spinner.start(orange`Restoring userpool`);
-            await restoreUsers(cognitoISP, userpool, file, password, passwordModulePath);
+            await restoreUsers(cognitoISP, userpool, file, password, passwordModulePath, groups);
             spinner.succeed(green(`Users imported successfully to ${userpool}\n`));
         } else {
             spinner.fail(red`Mode passed is invalid, please make sure a valid command is passed here.\n`);

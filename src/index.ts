@@ -10,6 +10,7 @@ type CognitoISP = AWS.CognitoIdentityServiceProvider;
 type ListUsersRequestTypes = AWS.CognitoIdentityServiceProvider.Types.ListUsersRequest;
 type AdminListGroupsForUserRequest = AWS.CognitoIdentityServiceProvider.Types.AdminListGroupsForUserRequest;
 type AdminCreateUserRequest = AWS.CognitoIdentityServiceProvider.Types.AdminCreateUserRequest;
+type AdminAddUserToGroupRequest = AWS.CognitoIdentityServiceProvider.Types.AdminAddUserToGroupRequest;
 type AttributeType = AWS.CognitoIdentityServiceProvider.Types.AttributeType;
 type UserType = AWS.CognitoIdentityServiceProvider.Types.UserType;
 type GroupListType = AWS.CognitoIdentityServiceProvider.Types.GroupListType;
@@ -89,7 +90,7 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
 };
 
 
-export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string, passwordModulePath?: String, delayDurationInMillis: number = 0) => {
+export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string, passwordModulePath?: String, groups: boolean = false) => {
     if (UserPoolId == 'all') throw Error(`'all' is not a acceptable value for UserPoolId`);
     let pwdModule: any = null;
     if (typeof passwordModulePath === 'string') {
@@ -141,15 +142,35 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
                 params.MessageAction = 'SUPPRESS';
                 params.TemporaryPassword = password;
             }
-            const wrapped = limiter.wrap(async () => cognito.adminCreateUser(params).promise());
+
+            const wrapped = limiter.wrap(async () => {
+                await cognito.adminCreateUser(params).promise();
+
+                if (groups && Array.isArray(user.Groups)) {
+                    for (const group of user.Groups) {
+                        const params: AdminAddUserToGroupRequest = {
+                            UserPoolId,
+                            Username: user.Username,
+                            GroupName: group.GroupName,
+                        };
+
+                        try {
+                            await cognito.adminAddUserToGroup(params).promise();
+                        } catch (e) {
+                            console.error(`Could not add user "${user.Username}" to group "${group.GroupName}". ${e.message}`);
+                        }
+                    }
+                }
+            });
+
             try {
-               await wrapped();
+                await wrapped();
             } catch (e) {
-              if (e.code === 'UsernameExistsException') {
-                  console.log(`Looks like user ${user.Username} already exists, ignoring.`)
-              } else {
-                throw e;
-              }
+                if (e.code === 'UsernameExistsException') {
+                    console.log(`Looks like user ${user.Username} already exists, ignoring.`)
+                } else {
+                    throw e;
+                }
             }
         };
     });
