@@ -8,11 +8,18 @@ const JSONStream = require('JSONStream');
 
 type CognitoISP = AWS.CognitoIdentityServiceProvider;
 type ListUsersRequestTypes = AWS.CognitoIdentityServiceProvider.Types.ListUsersRequest;
+type AdminListGroupsForUserRequest = AWS.CognitoIdentityServiceProvider.Types.AdminListGroupsForUserRequest;
 type AdminCreateUserRequest = AWS.CognitoIdentityServiceProvider.Types.AdminCreateUserRequest;
 type AttributeType = AWS.CognitoIdentityServiceProvider.Types.AttributeType;
+type UserType = AWS.CognitoIdentityServiceProvider.Types.UserType;
+type GroupListType = AWS.CognitoIdentityServiceProvider.Types.GroupListType;
+
+type UserTypeWithGroups = UserType & {
+    Groups: GroupListType;
+};
 
 
-export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string, delayDurationInMillis: number = 0) => {
+export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, directory: string, delayDurationInMillis: number = 0, groups: boolean = false) => {
     let userPoolList: string[] = [];
 
     if (UserPoolId == 'all') {
@@ -41,7 +48,24 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
         try {
             const paginationCalls = async () => {
                 const { Users = [], PaginationToken } = await cognito.listUsers(params).promise();
-                Users.forEach(user => stringify.write(user as string));
+
+                for (let user of Users) {
+                    if (groups && user.Username) {
+                        const params: AdminListGroupsForUserRequest = {
+                            UserPoolId: poolId,
+                            Username: user.Username,
+                        }
+
+                        const { Groups } = await cognito.adminListGroupsForUser(params).promise();
+
+                        user = {
+                            ...user,
+                            Groups,
+                        } as UserTypeWithGroups;
+                    }
+
+                    stringify.write(user as string)
+                }
 
                 if (PaginationToken) {
                     params.PaginationToken = PaginationToken;
