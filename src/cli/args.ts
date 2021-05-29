@@ -101,6 +101,11 @@ export const argv = yargs
         describe: dimmed`delay in millis between alternate users batch(60) backup, to avoid rate limit error`,
         number: true
     })
+    .option('include-groups', {
+        alias: ['groups'],
+        describe: dimmed`Include the groups that a user is included in.`,
+        type: 'boolean'
+    })
 
     // help
     .help('help', dimmed`Show help`)
