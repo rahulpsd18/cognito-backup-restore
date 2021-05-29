@@ -90,7 +90,7 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
 };
 
 
-export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string, passwordModulePath?: String, groups: boolean = false) => {
+export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file: string, password?: string, passwordModulePath?: String, groups: boolean = false): Promise<void> => {
     if (UserPoolId == 'all') throw Error(`'all' is not a acceptable value for UserPoolId`);
     let pwdModule: any = null;
     if (typeof passwordModulePath === 'string') {
@@ -104,78 +104,82 @@ export const restoreUsers = async (cognito: CognitoISP, UserPoolId: string, file
     const readStream = fs.createReadStream(file);
     const parser = JSONStream.parse();
 
-    parser.on('data', async (data: any[]) => {
-        for (let user of data) {
-            // filter out non-mutable attributes
-            const attributes = user.Attributes.filter((attr: AttributeType) => attr.Name !== 'sub');
+    return new Promise((resolve, reject) => {
+        parser.on('data', async (data: any[]) => {
+            for (let user of data) {
+                // filter out non-mutable attributes
+                const attributes = user.Attributes.filter((attr: AttributeType) => attr.Name !== 'sub');
 
-            const params: AdminCreateUserRequest = {
-                UserPoolId,
-                Username: user.Username,
-                UserAttributes: attributes
-            };
+                const params: AdminCreateUserRequest = {
+                    UserPoolId,
+                    Username: user.Username,
+                    UserAttributes: attributes
+                };
 
-            // Set Username as email if UsernameAttributes of UserPool contains email
-            if (UsernameAttributes.includes('email')) {
-                params.Username = pluckValue(user.Attributes, 'email') as string;
-                params.DesiredDeliveryMediums = ['EMAIL']
-            } else if (UsernameAttributes.includes('phone_number')) {
-                params.Username = pluckValue(user.Attributes, 'phone_number') as string;
-                params.DesiredDeliveryMediums = ['EMAIL', 'SMS']
-            }
-
-            // If password module is specified, use it silently
-            // if not provided or it throws, we fallback to password if provided
-            // if password is provided, use it silently
-            // else set a cognito generated one and send email (default)
-            let specificPwdExistsForUser = false;
-            if (pwdModule !== null){
-                try {
-                    params.MessageAction = 'SUPPRESS';
-                    params.TemporaryPassword = pwdModule.getPwdForUsername(user.Username);
-                    specificPwdExistsForUser = true;
-                } catch (e) {
-                    console.error(`"${e.message}" error occurred for user "${params.Username}" while getting password from ${passwordModulePath}. Falling back to default.`);
+                // Set Username as email if UsernameAttributes of UserPool contains email
+                if (UsernameAttributes.includes('email')) {
+                    params.Username = pluckValue(user.Attributes, 'email') as string;
+                    params.DesiredDeliveryMediums = ['EMAIL']
+                } else if (UsernameAttributes.includes('phone_number')) {
+                    params.Username = pluckValue(user.Attributes, 'phone_number') as string;
+                    params.DesiredDeliveryMediums = ['EMAIL', 'SMS']
                 }
-            }
-            if (!specificPwdExistsForUser && password) {
-                params.MessageAction = 'SUPPRESS';
-                params.TemporaryPassword = password;
-            }
 
-            const wrapped = limiter.wrap(async () => {
-                await cognito.adminCreateUser(params).promise();
-
-                if (groups && Array.isArray(user.Groups)) {
-                    for (const group of user.Groups) {
-                        const params: AdminAddUserToGroupRequest = {
-                            UserPoolId,
-                            Username: user.Username,
-                            GroupName: group.GroupName,
-                        };
-
-                        try {
-                            await cognito.adminAddUserToGroup(params).promise();
-                        } catch (e) {
-                            console.error(`Could not add user "${user.Username}" to group "${group.GroupName}". ${e.message}`);
-                        }
+                // If password module is specified, use it silently
+                // if not provided or it throws, we fallback to password if provided
+                // if password is provided, use it silently
+                // else set a cognito generated one and send email (default)
+                let specificPwdExistsForUser = false;
+                if (pwdModule !== null){
+                    try {
+                        params.MessageAction = 'SUPPRESS';
+                        params.TemporaryPassword = pwdModule.getPwdForUsername(user.Username);
+                        specificPwdExistsForUser = true;
+                    } catch (e) {
+                        console.error(`"${e.message}" error occurred for user "${params.Username}" while getting password from ${passwordModulePath}. Falling back to default.`);
                     }
                 }
-            });
+                if (!specificPwdExistsForUser && password) {
+                    params.MessageAction = 'SUPPRESS';
+                    params.TemporaryPassword = password;
+                }
 
-            try {
-                await wrapped();
-            } catch (e) {
-                if (e.code === 'UsernameExistsException') {
-                    console.log(`Looks like user ${user.Username} already exists, ignoring.`)
-                } else {
-                    throw e;
+                const wrapped = limiter.wrap(async () => {
+                    await cognito.adminCreateUser(params).promise();
+
+                    if (groups && Array.isArray(user.Groups)) {
+                        for (const group of user.Groups) {
+                            const params: AdminAddUserToGroupRequest = {
+                                UserPoolId,
+                                Username: user.Username,
+                                GroupName: group.GroupName,
+                            };
+
+                            try {
+                                await cognito.adminAddUserToGroup(params).promise();
+                            } catch (e) {
+                                console.error(`Could not add user "${user.Username}" to group "${group.GroupName}". ${e.message}`);
+                            }
+                        }
+                    }
+                });
+
+                try {
+                    await wrapped();
+                } catch (e) {
+                    if (e.code === 'UsernameExistsException') {
+                        console.log(`Looks like user ${user.Username} already exists, ignoring.`)
+                    } else {
+                        return reject(e);
+                    }
                 }
             }
-        };
-    });
 
-    readStream.pipe(parser);
+            return resolve();
+        });
+
+        readStream.pipe(parser);
+    });
 };
 
 const pluckValue = (arr: AttributeType[], key: string) => {
