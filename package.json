@@ -4,6 +4,7 @@
   "description": "AIO Tool for backing up and restoring AWS Cognito User Pools",
   "main": "build/index.js",
   "scripts": {
+    "prepare": "tsc",
     "build": "tsc",
     "clean": "rm -rf ./node_modules && rm package-lock.json && echo Cleanup done.",
     "test": "echo \"Error: no test specified\" && exit 1",
