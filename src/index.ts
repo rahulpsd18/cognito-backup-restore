@@ -23,6 +23,8 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
         userPoolList.push(UserPoolId);
     }
 
+    const dataWrittenPromises: Promise<void>[] = [];
+
     for (let poolId of userPoolList) {
 
         // create directory if not exists
@@ -37,8 +39,12 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
         const params: ListUsersRequestTypes = {
             UserPoolId: poolId
         };
-
+        let resolver: () => void;
         try {
+            const userPoolPromise = new Promise<void>((resolve: () => void) => {
+                resolver = resolve;
+            });
+            dataWrittenPromises.push(userPoolPromise);
             const paginationCalls = async () => {
                 const { Users = [], PaginationToken } = await cognito.listUsers(params).promise();
                 Users.forEach(user => stringify.write(user as string));
@@ -56,12 +62,16 @@ export const backupUsers = async (cognito: CognitoISP, UserPoolId: string, direc
         } catch (error) {
             throw error; // to be catched by calling function
         } finally {
-            stringify.end();
-            stringify.on('end', () => {
+            stringify.on('end', function () {
                 writeStream.end();
             });
+            writeStream.on('close', function () {
+                resolver();
+            });
+            stringify.end();
         }
     }
+    await Promise.all(dataWrittenPromises);
 };
 
 
